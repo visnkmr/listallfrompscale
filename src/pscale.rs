@@ -3,7 +3,6 @@ use std::{env, default, any::TypeId};
 
 use mysql::{Pool,  QueryResult, prelude::Queryable, Params, Row, params, PooledConn};
 use serde::*;
-use crate::commitstruct::{sessioncount, oses, eachevent, osl, eventcount};
 
 pub fn getconn(url:String)->Pool{
 

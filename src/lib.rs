@@ -1,6 +1,4 @@
 use std::{env, any::TypeId};
-mod stats;
-mod repochanges;
 use chrono::{DateTime, FixedOffset, NaiveDateTime, Utc};
 // use commitstojson::commitstojson;
 use pscale::*;
@@ -9,22 +7,15 @@ use reqwest::{blocking::Client, header::{HeaderMap, CONTENT_TYPE, AUTHORIZATION}
 use serde::{Serialize, Deserialize, Deserializer};
 use serde_json::{Value, json};
 use dotenv::dotenv;
-mod getrepolist;
-mod getcommits;
-mod commitstruct;
-mod reponames;
-mod commitstojson;
 mod pscale;
-mod acenter;
 // #[test]
 //the codeberg and gitea server stats getting api
 
 
 
 
-use crate::{getrepolist::*, commitstruct::*, acenter::*};
-#[tokio::main]
-async fn main()-> Result<(), Box<dyn std::error::Error>>{
+// #[tokio::main]
+async fn getdata()-> Result<String, Box<dyn std::error::Error>>{
 
     dotenv().ok();
     // commitstojson();
