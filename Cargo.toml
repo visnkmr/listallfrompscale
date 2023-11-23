@@ -15,6 +15,14 @@ prefstore= {git="https://github.com/visnkmr/prefstore.git"}
 # prefstore= {path="../../rust/prefstore/prefstore/"}
 serde = {version = "1.0.163", features = ["derive"]}
 mysql="*"
+
+url = "2.4.1"
+rand = "0.8.5"
+tracing = { version = "0.1", features = ["log"] }
+tracing-subscriber = { version = "0.3", default-features = false, features = [
+    "fmt",
+] }
+
 tokio = { version = "1.28.2", features = ["full"] }
 # sqlx = { version = "0.6.3", features = ["mysql", "runtime-tokio-rustls"] }
 vercel_runtime = "1.1.0"

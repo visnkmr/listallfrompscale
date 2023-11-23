@@ -8,14 +8,14 @@ async fn main() -> Result<(), Error> {
 }
 
 pub async fn handler(_req: Request) -> Result<Response<Body>, Error> {
-    let starter = choose_starter();
+    // let starter = choose_starter();
 
     Ok(Response::builder()
         .status(StatusCode::OK)
         .header("Content-Type", "application/json")
         .body(
             json!({
-              "data": getdata(),
+              "data": getdata().unwrap(),
             })
             .to_string()
             .into(),
