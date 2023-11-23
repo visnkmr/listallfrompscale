@@ -1,13 +1,13 @@
 use std::{env, any::TypeId};
 use chrono::{DateTime, FixedOffset, NaiveDateTime, Utc};
 // use commitstojson::commitstojson;
-// use pscale::*;
+use pscale::*;
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 use reqwest::{blocking::Client, header::{HeaderMap, CONTENT_TYPE, AUTHORIZATION}};
 use serde::{Serialize, Deserialize, Deserializer};
 use serde_json::{Value, json};
 use dotenv::dotenv;
-// mod pscale;
+mod pscale;
 // #[test]
 //the codeberg and gitea server stats getting api
 
@@ -20,10 +20,11 @@ pub fn choose_starter() -> String {
     starter.to_string()
 }
 
-// #[tokio::main]
- pub fn getdata()-> Result<String, Box<dyn std::error::Error>>{
+#[tokio::main]
+ pub async fn main()-> Result<(), Box<dyn std::error::Error>>{
 
     dotenv().ok();
+    println!("{:?}",printdata());
     // commitstojson();
     // let today = Utc::now();
     // let date_28_days_ago = &(today - chrono::Duration::days(27)).format("%Y-%m-%d").to_string();
@@ -56,8 +57,8 @@ pub fn choose_starter() -> String {
     // }
     // println!("{:?}",vecstoadd);
     
-    
-    Ok("Yes".to_string())
+    Ok(())
+    // Ok("Yes".to_string())
 }
 
 

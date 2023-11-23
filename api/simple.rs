@@ -1,5 +1,6 @@
 use serde_json::json;
 use listallfrompscale::getdata;
+mod pscale;
 use vercel_runtime::{run, Body, Error, Request, Response, StatusCode};
 
 #[tokio::main]
@@ -15,7 +16,7 @@ pub async fn handler(_req: Request) -> Result<Response<Body>, Error> {
         .header("Content-Type", "application/json")
         .body(
             json!({
-              "data": getdata().unwrap(),
+              "data": printdata().unwrap(),
             })
             .to_string()
             .into(),

@@ -14,7 +14,8 @@ dotenv = "0.15.0"
 prefstore= {git="https://github.com/visnkmr/prefstore.git"}
 # prefstore= {path="../../rust/prefstore/prefstore/"}
 serde = {version = "1.0.163", features = ["derive"]}
-mysql="*"
+# mysql="*"
+diesel = { version = "2.1.0", features = ["postgres"] }
 
 url = "2.4.1"
 rand = "0.8.5"
@@ -28,17 +29,17 @@ tokio = { version = "1.28.2", features = ["full"] }
 vercel_runtime = "1.1.0"
 # vercel_runtime = { version = "1.1.0", path = "../../crates/vercel_runtime" }
 
-[lib]
-path = "src/lib.rs"
+# [lib]
+# path = "src/lib.rs"
 
-[[bin]]
-name = "simple"
-path = "api/simple.rs"
+# [[bin]]
+# name = "simple"
+# path = "api/simple.rs"
 
-[[bin]]
-name = "complex"
-path = "api/complex.rs"
+# [[bin]]
+# name = "complex"
+# path = "api/complex.rs"
 
-[[bin]]
-name = "_id_"
-path = "api/user/[id].rs"
+# [[bin]]
+# name = "_id_"
+# path = "api/user/[id].rs"
