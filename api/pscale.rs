@@ -96,15 +96,16 @@ fn parse_row_as_data(mut row: mysql::Row) -> eachuser {
     bill
     // ...
 }
-pub fn printdata()-> Result<Vec<mysql::Row>,()>{
+pub fn printdata()-> Result<String,()>{
     let pool=pscaleread();
     let mut _conn = pool.get_conn().unwrap();
     let mut results:Vec<Row> = _conn .query("SELECT * from urls").unwrap();
+    let mut svec=String::new();
     for eacha in &results{
 
-        println!("{:?}",parse_row_as_data(eacha.clone()));
+        svec.push_str(&format!("{:?}",parse_row_as_data(eacha.clone())));
     }
-    Ok(results)
+    Ok(svec)
 }
 // fn addeachtoscdb(mut conn:&mut PooledConn)->Result<(),()>{
 //     let mut saved=false;

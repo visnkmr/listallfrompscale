@@ -1,5 +1,5 @@
 use serde_json::json;
-use listallfrompscale::getdata;
+use pscale::printdata;
 mod pscale;
 use vercel_runtime::{run, Body, Error, Request, Response, StatusCode};
 
