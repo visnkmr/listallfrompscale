@@ -41,5 +41,9 @@ name = "complex"
 path = "api/complex.rs"
 
 [[bin]]
+name = "pscale"
+path = "api/pscale.rs"
+
+[[bin]]
 name = "_id_"
 path = "api/user/[id].rs"
