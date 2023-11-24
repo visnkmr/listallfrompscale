@@ -1,26 +1,26 @@
 
 use std::{env, default, any::TypeId};
 
-use diesel::*;
-// use mysql::{Pool,  QueryResult, prelude::Queryable, Params, Row, params, PooledConn};
+// use diesel::*;
+use mysql::{Pool,  QueryResult, prelude::Queryable, Params, Row, params, PooledConn};
 use serde::*;
 
-pub fn getconn(url:String)->PgConnection{
+pub fn getconn(url:String)->Pool{
 
-    // let builder = mysql::OptsBuilder::from_opts(mysql::Opts::from_url(&url).unwrap());
+    let builder = mysql::OptsBuilder::from_opts(mysql::Opts::from_url(&url).unwrap());
 
-    // let pool = mysql::Pool::new(builder.ssl_opts(mysql::SslOpts::default())).unwrap();
-    let pool=PgConnection::establish(&url)
-    .unwrap_or_else(|_| panic!("Error connecting to {}", url));
+    let pool = mysql::Pool::new(builder.ssl_opts(mysql::SslOpts::default())).unwrap();
+    // let pool=PgConnection::establish(&url)
+    // .unwrap_or_else(|_| panic!("Error connecting to {}", url));
 
     
     pool
 }
-pub fn pscalewrite()->PgConnection{
+pub fn pscalewrite()->Pool{
     let url = env::var("DATAW").unwrap();
     getconn(url)
 }
-pub fn pscaleread()->PgConnection{
+pub fn pscaleread()->Pool{
     let url = env::var("DATAR").unwrap();
     getconn(url)
 }
@@ -80,16 +80,27 @@ pub fn pscaleread()->PgConnection{
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct eachuser{
     pub id:String,
-    pub url:Vec<String>,
-    // pub uid:String,
-    // pub pswd:String
+    pub url:String,
+    pub uid:String,
+    pub pswd:String
     
+}
+fn parse_row_as_data(mut row: mysql::Row) -> eachuser {
+    let mut bill = eachuser::default();
+
+    bill.id = row.take("id").unwrap();
+    bill.url = row.take("uid").unwrap();
+    bill.url = row.take("url").unwrap();
+    bill.pswd = row.take("pswd").unwrap();
+
+    bill
+    // ...
 }
 pub fn printdata()-> Result<Vec<eachuser>,()>{
     let pool=pscaleread();
-    let mut _conn = pool;
-    let mut results = _conn .query_map(
-        "SELECT id,url from urls",
+    let mut _conn = pool.get_conn().unwrap();
+    let mut results = _conn .query(
+        "SELECT * from urls",
         |(
             id,
             url,

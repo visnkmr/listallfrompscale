@@ -14,8 +14,8 @@ dotenv = "0.15.0"
 prefstore= {git="https://github.com/visnkmr/prefstore.git"}
 # prefstore= {path="../../rust/prefstore/prefstore/"}
 serde = {version = "1.0.163", features = ["derive"]}
-# mysql="*"
-diesel = { version = "2.1.0", features = ["postgres"] }
+mysql="*"
+# diesel = { version = "2.1.0", features = ["postgres"] }
 
 url = "2.4.1"
 rand = "0.8.5"
