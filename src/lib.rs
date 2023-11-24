@@ -21,6 +21,7 @@ pub fn choose_starter() -> String {
 }
 
 // #[tokio::main]
+//  pub async fn main()-> Result<(), Box<dyn std::error::Error>>{
  pub fn testdata()-> Result<(), Box<dyn std::error::Error>>{
 
     dotenv().ok();
