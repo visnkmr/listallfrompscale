@@ -81,45 +81,29 @@ pub fn pscaleread()->Pool{
 pub struct eachuser{
     pub id:String,
     pub url:String,
-    pub uid:String,
-    pub pswd:String
+    // pub uid:String,
+    // pub pswd:String
     
 }
 fn parse_row_as_data(mut row: mysql::Row) -> eachuser {
     let mut bill = eachuser::default();
 
     bill.id = row.take("id").unwrap();
-    bill.url = row.take("uid").unwrap();
+    // bill.url = row.take("uid").unwrap();
     bill.url = row.take("url").unwrap();
-    bill.pswd = row.take("pswd").unwrap();
+    // bill.pswd = row.take("pswd").unwrap();
 
     bill
     // ...
 }
-pub fn printdata()-> Result<Vec<eachuser>,()>{
+pub fn printdata()-> Result<Vec<mysql::Row>,()>{
     let pool=pscaleread();
     let mut _conn = pool.get_conn().unwrap();
-    let mut results = _conn .query(
-        "SELECT * from urls",
-        |(
-            id,
-            url,
-            // uid,
-            // pswd
-        )| {
-            // let g:i32=id;
-            eachuser{
-                id,
-                url,
-                // uid,
-                // pswd
-             }
-        },
-    ).unwrap();
-    // for eacha in &results{
+    let mut results:Vec<Row> = _conn .query("SELECT * from urls").unwrap();
+    for eacha in &results{
 
-    //     println!("{:?}",eacha);
-    // }
+        println!("{:?}",parse_row_as_data(eacha.clone()));
+    }
     Ok(results)
 }
 // fn addeachtoscdb(mut conn:&mut PooledConn)->Result<(),()>{
