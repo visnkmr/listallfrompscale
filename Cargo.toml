@@ -40,9 +40,9 @@ path = "api/simple.rs"
 name = "complex"
 path = "api/complex.rs"
 
-[[bin]]
-name = "pscale"
-path = "api/pscale.rs"
+# [[bin]]
+# name = "pscale"
+# path = "api/pscale.rs"
 
 [[bin]]
 name = "_id_"

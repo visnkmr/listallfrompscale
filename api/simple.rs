@@ -1,6 +1,6 @@
 use serde_json::json;
-use pscale::printdata;
-mod pscale;
+use listallfrompscale::printdata;
+// mod pscale;
 use vercel_runtime::{run, Body, Error, Request, Response, StatusCode};
 
 #[tokio::main]
