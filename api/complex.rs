@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use listallfrompscale::printdata;
+use listallfrompscale::{printdata, printeuser};
 // use listallfrompscale::choose_starter;
 use vercel_runtime::{
     http::bad_request, process_request, process_response, run_service, service_fn, Body, Error,
@@ -51,14 +51,16 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
         }),
         Ok(Some(payload)) => {
             // let starter = choose_starter();
-
+            let data=printeuser(payload.uid.clone(), payload.pswd.clone()).unwrap().url;
+            let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
+            // let jdata=serde_json::to_value(&data).unwrap();
             Ok(Response::builder()
             .status(StatusCode::OK)
             .header("Content-Type", "application/json")
             .body(
                 json!({
                   "got": format!("{} ----- {}!", payload.uid, payload.pswd),
-                  "data": printdata(payload.uid, payload.pswd).unwrap(),
+                  "data": serde_json::to_string(&jdata).unwrap(),
                 })
                 .to_string()
                 .into(),

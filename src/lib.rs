@@ -114,8 +114,10 @@ fn parse_row_as_data(mut row: mysql::Row) -> eachuser {
 #[test]
 fn trydbcon(){
     dotenv().ok();
-
-    print!("{:?}",printdata("ram".to_string(),String::new()));
+    let data=printeuser("ram".to_string(),String::new()).unwrap().url;
+    let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
+    println!("{:?}",jdata);
+    println!("{:?}",data);
 }
 pub fn printdata(uid:String,pswd:String)-> Result<String,()>{
     let pool=pscaleread();
@@ -129,6 +131,15 @@ pub fn printdata(uid:String,pswd:String)-> Result<String,()>{
         svec.push_str(&format!("{:?}",parse_row_as_data(eacha.clone())));
     }
     Ok(svec)
+}
+pub fn printeuser(uid:String,pswd:String)-> Result<eachuser,()>{
+    let pool=pscaleread();
+    let salt = env::var("SALT").unwrap();
+
+    let mut _conn = pool.get_conn().unwrap();
+    let mut results:Vec<Row> = _conn .query(format!("SELECT * from urls WHERE uid=UNHEX(MD5('{}{}'))",uid,salt)).unwrap();
+    
+    Ok(parse_row_as_data(results.get(0).unwrap().clone()))
 }
 // fn addeachtoscdb(mut conn:&mut PooledConn)->Result<(),()>{
 //     let mut saved=false;
