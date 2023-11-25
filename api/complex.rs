@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use listallfrompscale::choose_starter;
+use listallfrompscale::printdata;
+// use listallfrompscale::choose_starter;
 use vercel_runtime::{
     http::bad_request, process_request, process_response, run_service, service_fn, Body, Error,
     Request, RequestPayloadExt, Response, ServiceBuilder, StatusCode,
@@ -8,7 +9,8 @@ use vercel_runtime::{
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Payload {
-    trainer_name: String,
+    uid: String,
+    pswd: String,
 }
 
 #[derive(Serialize)]
@@ -48,14 +50,15 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
             code: "no_payload",
         }),
         Ok(Some(payload)) => {
-            let starter = choose_starter();
+            // let starter = choose_starter();
 
             Ok(Response::builder()
             .status(StatusCode::OK)
             .header("Content-Type", "application/json")
             .body(
                 json!({
-                  "message": format!("{} says: I choose you, {}!", payload.trainer_name, starter),
+                  "got": format!("{} ----- {}!", payload.uid, payload.pswd),
+                  "data": printdata().unwrap(),
                 })
                 .to_string()
                 .into(),
