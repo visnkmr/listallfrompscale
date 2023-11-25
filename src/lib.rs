@@ -111,10 +111,18 @@ fn parse_row_as_data(mut row: mysql::Row) -> eachuser {
     bill
     // ...
 }
-pub fn printdata()-> Result<String,()>{
+#[test]
+fn trydbcon(){
+    dotenv().ok();
+
+    print!("{:?}",printdata("ram".to_string(),String::new()));
+}
+pub fn printdata(uid:String,pswd:String)-> Result<String,()>{
     let pool=pscaleread();
+    let salt = env::var("SALT").unwrap();
+
     let mut _conn = pool.get_conn().unwrap();
-    let mut results:Vec<Row> = _conn .query("SELECT * from urls").unwrap();
+    let mut results:Vec<Row> = _conn .query(format!("SELECT * from urls WHERE uid=UNHEX(MD5('{}{}'))",uid,salt)).unwrap();
     let mut svec=String::new();
     for eacha in &results{
 

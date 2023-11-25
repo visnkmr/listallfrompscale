@@ -58,7 +58,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
             .body(
                 json!({
                   "got": format!("{} ----- {}!", payload.uid, payload.pswd),
-                  "data": printdata().unwrap(),
+                  "data": printdata(payload.uid, payload.pswd).unwrap(),
                 })
                 .to_string()
                 .into(),

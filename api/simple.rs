@@ -16,7 +16,7 @@ pub async fn handler(_req: Request) -> Result<Response<Body>, Error> {
         .header("Content-Type", "application/json")
         .body(
             json!({
-              "data": printdata().unwrap(),
+              "data": printdata(String::new(),String::new()).unwrap(),
               "request":format!("{:?}",_req),
             })
             .to_string()
