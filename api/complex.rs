@@ -60,7 +60,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                 .redis(redis.clone())
                 .limiter(Limiter::FixedWindow {
                     tokens: 1,
-                    window: Duration::from_millis(1000),
+                    window: Duration::from_millis(5000),
                 })
                 .build()?;
 
