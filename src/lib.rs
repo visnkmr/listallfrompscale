@@ -11,7 +11,6 @@ use dotenv::dotenv;
 // #[test]
 //the codeberg and gitea server stats getting api
 
-
 use rand::seq::SliceRandom;
 
 use std::{env, default, any::TypeId};

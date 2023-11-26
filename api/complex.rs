@@ -1,3 +1,5 @@
+use std::{env, time::Duration};
+
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use listallfrompscale::{printdata, printeuser};
@@ -35,6 +37,7 @@ async fn main() -> Result<(), Error> {
 
     run_service(handler).await
 }
+use upstash_ratelimit::{Limiter, RateLimit, Response as rsp};
 
 pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
     tracing::info!("Choosing a starter Pokemon");
@@ -50,21 +53,51 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
             code: "no_payload",
         }),
         Ok(Some(payload)) => {
-            // let starter = choose_starter();
-            let data=printeuser(payload.uid.clone(), payload.pswd.clone()).unwrap().url;
-            let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
-            // let jdata=serde_json::to_value(&data).unwrap();
-            Ok(Response::builder()
-            .status(StatusCode::OK)
-            .header("Content-Type", "application/json")
-            .body(
-                json!({
-                  "got": format!("{} ----- {}!", payload.uid, payload.pswd),
-                  "data": serde_json::to_string(&jdata).unwrap(),
+            let usak=env::var("USAK").unwrap();
+            let redis = redis::Client::open(usak)?;
+
+            let ratelimit = RateLimit::builder()
+                .redis(redis.clone())
+                .limiter(Limiter::FixedWindow {
+                    tokens: 1,
+                    window: Duration::from_millis(1000),
                 })
-                .to_string()
-                .into(),
-            )?)
+                .build()?;
+
+            // let response = ;
+
+            match ratelimit.limit("rlimit").unwrap() {
+                rsp::Success { .. } => {
+                    // let starter = choose_starter();
+                    let data=printeuser(payload.uid.clone(), payload.pswd.clone()).unwrap().url;
+                    let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
+                    // let jdata=serde_json::to_value(&data).unwrap();
+                    Ok(Response::builder()
+                    .status(StatusCode::OK)
+                    .header("Content-Type", "application/json")
+                    .body(
+                        json!({
+                        "got": format!("{} ----- {}!", payload.uid, payload.pswd),
+                        "data": serde_json::to_string(&jdata).unwrap(),
+                        })
+                        .to_string()
+                        .into(),
+                    )?)
+                },
+                rsp::Failure { .. } => {
+                    Ok(Response::builder()
+                    .status(StatusCode::TOO_MANY_REQUESTS)
+                    .header("Content-Type", "application/json")
+                    .body(
+                        json!({
+                        "FAILED": "YES"
+                        })
+                        .to_string()
+                        .into(),
+                    )?)
+                }
+            }
+            
         }
     }
 }
