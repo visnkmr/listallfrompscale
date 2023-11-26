@@ -79,6 +79,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                         json!({
                         "got": format!("{} ----- {}!", payload.uid, payload.pswd),
                         "data": serde_json::to_string(&jdata).unwrap(),
+                        "request":format!("{:?}",req),
                         })
                         .to_string()
                         .into(),
