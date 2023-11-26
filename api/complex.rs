@@ -40,7 +40,8 @@ async fn main() -> Result<(), Error> {
 use upstash_ratelimit::{Limiter, RateLimit, Response as rsp};
 
 pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
-    tracing::info!("Choosing a starter Pokemon");
+    tracing::info!("Recieved a req");
+    let ip=req.headers().get("x-vercel-forwarded-for").unwrap().to_str().unwrap().to_string();
     let payload = req.payload::<Payload>();
 
     match payload {
@@ -66,7 +67,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
 
             // let response = ;
 
-            match ratelimit.limit("rlimit").unwrap() {
+            match ratelimit.limit(ip).unwrap() {
                 rsp::Success { .. } => {
                     // let starter = choose_starter();
                     let data=printeuser(payload.uid.clone(), payload.pswd.clone()).unwrap().url;
