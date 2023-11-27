@@ -42,6 +42,10 @@ path = "api/listall.rs"
 name = "update"
 path = "api/update.rs"
 
+[[bin]]
+name = "create"
+path = "api/create.rs"
+
 # [[bin]]
 # name = "pscale"
 # path = "api/pscale.rs"
