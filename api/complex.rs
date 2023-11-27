@@ -39,7 +39,7 @@ async fn main() -> Result<(), Error> {
 
     run_service(handler).await
 }
-use upstash_ratelimit::{Limiter, RateLimit, Response as rsp};
+// use upstash_ratelimit::{Limiter, RateLimit, Response as rsp};
 
 pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
     tracing::info!("Recieved a req");
@@ -56,21 +56,21 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
             code: "no_payload",
         }),
         Ok(Some(payload)) => {
-            let usak=env::var("USAK").unwrap();
-            let redis = redis::Client::open(usak)?;
+            // let usak=env::var("USAK").unwrap();
+            // let redis = redis::Client::open(usak)?;
 
-            let ratelimit = RateLimit::builder()
-                .redis(redis.clone())
-                .limiter(Limiter::FixedWindow {
-                    tokens: 1,
-                    window: Duration::from_millis(5000),
-                })
-                .build()?;
+            // let ratelimit = RateLimit::builder()
+            //     .redis(redis.clone())
+            //     .limiter(Limiter::FixedWindow {
+            //         tokens: 1,
+            //         window: Duration::from_millis(5000),
+            //     })
+            //     .build()?;
 
-            // let response = ;
+            // // let response = ;
 
-            match ratelimit.limit(ip).unwrap() {
-                rsp::Success { .. } => {
+            // match ratelimit.limit(ip).unwrap() {
+            //     rsp::Success { .. } => {
                     // let starter = choose_starter();
                     // let data=printeuser(payload.uid.clone(), payload.datatoadd.clone()).unwrap().url;
                     // let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
@@ -103,20 +103,20 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                     }
                     // let jdata=serde_json::to_value(&data).unwrap();
                     
-                },
-                rsp::Failure { .. } => {
-                    Ok(Response::builder()
-                    .status(StatusCode::TOO_MANY_REQUESTS)
-                    .header("Content-Type", "application/json")
-                    .body(
-                        json!({
-                        "FAILED": "YES"
-                        })
-                        .to_string()
-                        .into(),
-                    )?)
-                }
-            }
+            //     },
+            //     rsp::Failure { .. } => {
+            //         Ok(Response::builder()
+            //         .status(StatusCode::TOO_MANY_REQUESTS)
+            //         .header("Content-Type", "application/json")
+            //         .body(
+            //             json!({
+            //             "FAILED": "YES"
+            //             })
+            //             .to_string()
+            //             .into(),
+            //         )?)
+            //     }
+            // }
             
         }
     }
