@@ -117,7 +117,8 @@ fn trydbcon(){
     // let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
     // println!("{:?}",jdata);
     // println!("{:?}",data);
-    println!("{:?}",createuser("vis".to_string(), "example".to_string()));
+    // println!("{:?}",createuser("vis".to_string(), "example".to_string()));
+    println!("{:?}",deleteuser("meg".to_string(), "example".to_string()));
     // println!("{:?}",adddatatouser("vis".to_string(), "google.com".to_string()));
     // println!("{:?}",printdata());
 }
@@ -158,6 +159,15 @@ pub fn createuser(uid:String,password:String)-> Result<String,()>{
 
     let mut _conn = pool.get_conn().unwrap();
     let results:Vec<Row> = _conn .exec("INSERT INTO urls (uid,pswd,url) VALUES (UNHEX(MD5(?)),UNHEX(MD5(?)),JSON_ARRAY());",(format!("{}{}",uid,salt),format!("{}{}",password,salt))).unwrap();
+    
+    Ok(format!("{:?}",results))
+}
+pub fn deleteuser(uid:String,password:String)-> Result<String,()>{
+    let pool=pscalewrite();
+    let salt = env::var("SALT").unwrap();
+
+    let mut _conn = pool.get_conn().unwrap();
+    let results:Vec<Row> = _conn .exec("DELETE FROM urls WHERE uid=UNHEX(MD5(?));",(format!("{}{}",uid,salt),)).unwrap();
     
     Ok(format!("{:?}",results))
 }
