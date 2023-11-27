@@ -1,8 +1,9 @@
 use std::{env, time::Duration};
 
+use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use listallfrompscale::{printdata, printeuser};
+use listallfrompscale::{ printeuser,adddatatouser};
 // use listallfrompscale::choose_starter;
 use vercel_runtime::{
     http::bad_request, process_request, process_response, run_service, service_fn, Body, Error,
@@ -12,6 +13,7 @@ use vercel_runtime::{
 #[derive(Debug, Serialize, Deserialize)]
 struct Payload {
     uid: String,
+    datatoadd: String,
     pswd: String,
 }
 
@@ -70,21 +72,37 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
             match ratelimit.limit(ip).unwrap() {
                 rsp::Success { .. } => {
                     // let starter = choose_starter();
-                    let data=printeuser(payload.uid.clone(), payload.pswd.clone()).unwrap().url;
-                    let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
-                    // let jdata=serde_json::to_value(&data).unwrap();
-                    Ok(Response::builder()
-                    .status(StatusCode::OK)
+                    // let data=printeuser(payload.uid.clone(), payload.datatoadd.clone()).unwrap().url;
+                    // let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
+                    if(req.method()==Method::POST){
+                        adddatatouser(payload.uid.clone(), payload.pswd.clone()).unwrap();
+                        Ok(Response::builder()
+                    .status(StatusCode::ACCEPTED)
                     .header("Content-Type", "application/json")
                     .body(
                         json!({
-                        "got": format!("{} ----- {}!", payload.uid, payload.pswd),
-                        "data": serde_json::to_string(&jdata).unwrap(),
+                        "got": format!("added {} to {}!", payload.uid, payload.datatoadd),
+                        // "data": serde_json::to_string(&jdata).unwrap(),
                         "request":format!("{:?}",req),
                         })
                         .to_string()
                         .into(),
                     )?)
+                    }
+                    else{
+                        Ok(Response::builder()
+                    .status(StatusCode::TOO_MANY_REQUESTS)
+                    .header("Content-Type", "application/json")
+                    .body(
+                        json!({
+                        "FAILED": "YES"
+                        })
+                        .to_string()
+                        .into(),
+                    )?)
+                    }
+                    // let jdata=serde_json::to_value(&data).unwrap();
+                    
                 },
                 rsp::Failure { .. } => {
                     Ok(Response::builder()

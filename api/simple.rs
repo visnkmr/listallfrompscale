@@ -32,7 +32,7 @@ match ratelimit.limit("rlimit").unwrap() {
         .header("Content-Type", "application/json")
         .body(
             json!({
-              "data": printdata(String::new(),String::new()).unwrap(),
+              "data": printdata().unwrap(),
               "request":format!("{:?}",_req),
             })
             .to_string()
