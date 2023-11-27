@@ -117,8 +117,8 @@ fn trydbcon(){
     // let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
     // println!("{:?}",jdata);
     // println!("{:?}",data);
-    // adddatatouser("ram".to_string(), "google.com".to_string());
-    println!("{:?}",printdata());
+    println!("{:?}",adddatatouser("ram".to_string(), "google.com".to_string()));
+    // println!("{:?}",printdata());
 }
 pub fn printdata()-> Result<String,()>{
     let pool=pscaleread();
@@ -142,14 +142,14 @@ pub fn printeuser(uid:String,pswd:String)-> Result<eachuser,()>{
     
     Ok(parse_row_as_data(results.get(0).unwrap().clone()))
 }
-pub fn adddatatouser(uid:String,datatoadd:String)-> Result<eachuser,()>{
+pub fn adddatatouser(uid:String,datatoadd:String)-> Result<String,()>{
     let pool=pscalewrite();
     let salt = env::var("SALT").unwrap();
 
     let mut _conn = pool.get_conn().unwrap();
-    let mut results:Vec<Row> = _conn .query(format!("UPDATE urls SET url = JSON_ARRAY_APPEND(url, '$', '{}') WHERE uid=UNHEX(MD5('{}{}'));",datatoadd,uid,salt)).unwrap();
+    let results:Vec<Row> = _conn .exec(("UPDATE urls SET url = JSON_ARRAY_APPEND(url, '$', ?) WHERE uid=UNHEX(MD5(?));"),(datatoadd,format!("{}{}",uid,salt))).unwrap();
     
-    Ok(parse_row_as_data(results.get(0).unwrap().clone()))
+    Ok(format!("{:?}",results))
 }
 // fn addeachtoscdb(mut conn:&mut PooledConn)->Result<(),()>{
 //     let mut saved=false;
