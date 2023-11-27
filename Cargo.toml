@@ -35,12 +35,12 @@ vercel_runtime = "1.1.0"
 path = "src/lib.rs"
 
 [[bin]]
-name = "simple"
-path = "api/simple.rs"
+name = "listall"
+path = "api/listall.rs"
 
 [[bin]]
-name = "complex"
-path = "api/complex.rs"
+name = "update"
+path = "api/update.rs"
 
 # [[bin]]
 # name = "pscale"
