@@ -14,7 +14,7 @@ use vercel_runtime::{
 struct Payload {
     uid: String,
     datatoadd: String,
-    pswd: String,
+    // pswd: String,
 }
 
 #[derive(Serialize)]
@@ -75,19 +75,19 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                     // let data=printeuser(payload.uid.clone(), payload.datatoadd.clone()).unwrap().url;
                     // let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
                     if(req.method()==Method::POST){
-                        adddatatouser(payload.uid.clone(), payload.pswd.clone()).unwrap();
+                        adddatatouser(payload.uid.clone(), payload.datatoadd.clone()).unwrap();
                         Ok(Response::builder()
-                    .status(StatusCode::ACCEPTED)
-                    .header("Content-Type", "application/json")
-                    .body(
-                        json!({
-                        "got": format!("added {} to {}!", payload.uid, payload.datatoadd),
-                        // "data": serde_json::to_string(&jdata).unwrap(),
-                        "request":format!("{:?}",req),
-                        })
-                        .to_string()
-                        .into(),
-                    )?)
+                        .status(StatusCode::ACCEPTED)
+                        .header("Content-Type", "application/json")
+                        .body(
+                            json!({
+                            "got": format!("added {} to db!", payload.datatoadd),
+                            // "data": serde_json::to_string(&jdata).unwrap(),
+                            "request":format!("{:?}",req),
+                            })
+                            .to_string()
+                            .into(),
+                        )?)
                     }
                     else{
                         Ok(Response::builder()
