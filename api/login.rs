@@ -84,7 +84,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                 .header("Content-Type", "application/json")
                                 .body(
                                     json!({
-                                    "got": format!("LOGIN SUCCESSFUL!"),
+                                    "got": format!("USER FOUND, LOGIN SUCCESSFUL!"),
                                     // "data": serde_json::to_string(&jdata).unwrap(),
                                     "request":format!("{:?}",req),
                                     })
@@ -98,7 +98,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                 .header("Content-Type", "application/json")
                                 .body(
                                     json!({
-                                        "FAILED": "YES",
+                                        "FAILED": "USER NOT FOUND",
                                         "request":format!("{:?}",req),
                                         })
                                         .to_string()
@@ -116,7 +116,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                     // .header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
                     .body(
                         json!({
-                        "FAILED": "YES",
+                        "FAILED": "BAD REQUEST",
                         "request":format!("{:?}",req),
                         })
                         .to_string()
