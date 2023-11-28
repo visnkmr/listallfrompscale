@@ -13,7 +13,7 @@ use vercel_runtime::{
 #[derive(Debug, Serialize, Deserialize)]
 struct Payload {
     uid: String,
-    datatoadd: String,
+    // datatoadd: String,
     pswd: String,
 }
 
@@ -75,31 +75,51 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                     // let data=printeuser(payload.uid.clone(), payload.datatoadd.clone()).unwrap().url;
                     // let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
                     if(req.method()==Method::POST){
-                        createuser(payload.uid.clone(), payload.pswd.clone()).unwrap();
+                        match(createuser(payload.uid.clone(), payload.pswd.clone())){
+                            Ok(_) => {
+                                Ok(Response::builder()
+                                .status(StatusCode::ACCEPTED)
+                                .header("Content-Type", "application/json")
+                                .body(
+                                    json!({
+                                    "SUCCESS": "CREATED USER SUCCESSFULLY!",
+                                    // "got": format!("added {} to {}!", payload.uid, payload.datatoadd),
+                                    // "data": serde_json::to_string(&jdata).unwrap(),
+                                    "request":format!("{:?}",req),
+                                    })
+                                    .to_string()
+                                    .into(),
+                                )?)
+                            },
+                            Err(_) => {
+                                Ok(Response::builder()
+                                .status(StatusCode::UNAUTHORIZED)
+                                .header("Content-Type", "application/json")
+                                .body(
+                                    json!({
+                                    "FAILED": "FAILED TO CREATE USER!",
+                                    // "got": format!("added {} to {}!", payload.uid, payload.datatoadd),
+                                    // "data": serde_json::to_string(&jdata).unwrap(),
+                                    "request":format!("{:?}",req),
+                                    })
+                                    .to_string()
+                                    .into(),
+                                )?)
+                            },
+                        }
+                        
+                    }
+                    else{
                         Ok(Response::builder()
-                        .status(StatusCode::ACCEPTED)
+                        .status(StatusCode::TOO_MANY_REQUESTS)
                         .header("Content-Type", "application/json")
                         .body(
                             json!({
-                            "got": format!("added {} to {}!", payload.uid, payload.datatoadd),
-                            // "data": serde_json::to_string(&jdata).unwrap(),
-                            "request":format!("{:?}",req),
+                            "FAILED": "YES"
                             })
                             .to_string()
                             .into(),
                         )?)
-                    }
-                    else{
-                        Ok(Response::builder()
-                    .status(StatusCode::TOO_MANY_REQUESTS)
-                    .header("Content-Type", "application/json")
-                    .body(
-                        json!({
-                        "FAILED": "YES"
-                        })
-                        .to_string()
-                        .into(),
-                    )?)
                     }
                     // let jdata=serde_json::to_value(&data).unwrap();
                     
