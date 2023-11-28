@@ -84,7 +84,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                 .header("Content-Type", "application/json")
                                 .body(
                                     json!({
-                                    "got": format!("added {} to {}!", payload.uid, payload.datatoadd),
+                                    "got": format!("LOGIN SUCCESSFUL!"),
                                     // "data": serde_json::to_string(&jdata).unwrap(),
                                     "request":format!("{:?}",req),
                                     })
