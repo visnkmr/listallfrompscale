@@ -13,7 +13,7 @@ use vercel_runtime::{
 #[derive(Debug, Serialize, Deserialize)]
 struct Payload {
     uid: String,
-    datatoadd: String,
+    // datatoadd: String,
     pswd: String,
 }
 
