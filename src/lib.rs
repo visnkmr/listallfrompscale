@@ -113,12 +113,18 @@ fn parse_row_as_data(mut row: mysql::Row) -> eachuser {
 #[test]
 fn trydbcon(){
     dotenv().ok();
+    // let uname="vis".to_string();
+    // let pwd="example".to_string();
+    let uname="asdsa".to_string();
+    let pwd="asdsa".to_string();
     // let data=printeuser("ram".to_string(),String::new()).unwrap().url;
     // let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
     // println!("{:?}",jdata);
     // println!("{:?}",data);
     // println!("{:?}",createuser("vis".to_string(), "example".to_string()));
-    println!("{:?}",deleteuser("meg".to_string(), "example".to_string()));
+    // println!("{:?}",deleteuser("meg".to_string(), "example".to_string()));
+    println!("{:?}",checklogin(uname, pwd));
+
     // println!("{:?}",adddatatouser("vis".to_string(), "google.com".to_string()));
     // println!("{:?}",printdata());
 }
@@ -161,6 +167,20 @@ pub fn createuser(uid:String,password:String)-> Result<String,()>{
     let results:Vec<Row> = _conn .exec("INSERT INTO urls (uid,pswd,url) VALUES (UNHEX(MD5(?)),UNHEX(MD5(?)),JSON_ARRAY());",(format!("{}{}",uid,salt),format!("{}{}",password,salt))).unwrap();
     
     Ok(format!("{:?}",results))
+}
+pub fn checklogin(uid:String,password:String)-> Result<String,()>{
+    let pool=pscalewrite();
+    let salt = env::var("SALT").unwrap();
+
+    let mut _conn = pool.get_conn().unwrap();
+    let results:Vec<Row> = _conn .exec("SELECT * FROM urls WHERE uid = UNHEX(MD5(?)) AND pswd = UNHEX(MD5(?)) ;",(format!("{}{}",uid,salt),format!("{}{}",password,salt))).unwrap();
+    if(!results.is_empty()){
+        Ok("Success".to_string())
+    }
+    else{
+        Err(())
+    }
+    
 }
 pub fn deleteuser(uid:String,password:String)-> Result<String,()>{
     let pool=pscalewrite();

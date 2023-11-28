@@ -50,6 +50,10 @@ path = "api/create.rs"
 name = "delete"
 path = "api/delete.rs"
 
+[[bin]]
+name = "login"
+path = "api/login.rs"
+
 # [[bin]]
 # name = "pscale"
 # path = "api/pscale.rs"
