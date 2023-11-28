@@ -94,7 +94,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                             },
                             Err(_) => {
                                 Ok(Response::builder()
-                                .status(StatusCode::BAD_REQUEST)
+                                .status(StatusCode::NOT_ACCEPTABLE)
                                 .header("Content-Type", "application/json")
                                 .body(
                                     json!({
