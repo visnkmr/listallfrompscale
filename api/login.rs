@@ -115,7 +115,8 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                     // .header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
                     .body(
                         json!({
-                        "FAILED": "YES"
+                        "FAILED": "YES",
+                        "request":format!("{:?}",req),
                         })
                         .to_string()
                         .into(),
