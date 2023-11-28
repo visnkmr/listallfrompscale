@@ -79,6 +79,8 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                             Ok(_) => {
                                 Ok(Response::builder()
                                 .status(StatusCode::ACCEPTED)
+                                .header("Access-Control-Allow-Origin", "*")
+                                .header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
                                 .header("Content-Type", "application/json")
                                 .body(
                                     json!({
@@ -109,6 +111,8 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                         Ok(Response::builder()
                     .status(StatusCode::TOO_MANY_REQUESTS)
                     .header("Content-Type", "application/json")
+                    .header("Access-Control-Allow-Origin", "*")
+                    .header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
                     .body(
                         json!({
                         "FAILED": "YES"
@@ -123,6 +127,8 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                 rsp::Failure { .. } => {
                     Ok(Response::builder()
                     .status(StatusCode::TOO_MANY_REQUESTS)
+                    .header("Access-Control-Allow-Origin", "*")
+                    .header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
                     .header("Content-Type", "application/json")
                     .body(
                         json!({
