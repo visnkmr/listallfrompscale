@@ -98,7 +98,8 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                                 .header("Content-Type", "application/json")
                                 .body(
                                     json!({
-                                        "FAILED": "YES"
+                                        "FAILED": "YES",
+                                        "request":format!("{:?}",req),
                                         })
                                         .to_string()
                                         .into(),
