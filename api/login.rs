@@ -3,7 +3,7 @@ use std::{env, time::Duration};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use listallfrompscale::{ createuser};
+use listallfrompscale::{ createuser, checklogin};
 // use listallfrompscale::choose_starter;
 use vercel_runtime::{
     http::bad_request, process_request, process_response, run_service, service_fn, Body, Error,
@@ -75,7 +75,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                     // let data=printeuser(payload.uid.clone(), payload.datatoadd.clone()).unwrap().url;
                     // let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
                     if(req.method()==Method::POST){
-                        match(createuser(payload.uid.clone(), payload.pswd.clone())){
+                        match(checklogin(payload.uid.clone(), payload.pswd.clone())){
                             Ok(_) => {
                                 Ok(Response::builder()
                                 .status(StatusCode::ACCEPTED)
