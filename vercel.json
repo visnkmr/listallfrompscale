@@ -7,6 +7,12 @@
 		{ "source": "/login", "destination": "/api/login.rs" },
 		{ "source": "/delete", "destination": "/api/delete.rs" },
 		{ "source": "/user/(.*)", "destination": "/api/user/[id].rs" },
+    { "source": "/api/listall", "destination": "/api/listall.rs" },
+		{ "source": "/api/create", "destination": "/api/create.rs" },
+		{ "source": "/api/update", "destination": "/api/update.rs" },
+		{ "source": "/api/login", "destination": "/api/login.rs" },
+		{ "source": "/api/delete", "destination": "/api/delete.rs" },
+		{ "source": "/api/user/(.*)", "destination": "/api/user/[id].rs" },
       {
         "source": "/(.*)",
         "destination": "/api/[...404].rs"
