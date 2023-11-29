@@ -12,11 +12,7 @@
 		{ "source": "/api/update", "destination": "/api/update.rs" },
 		{ "source": "/api/login", "destination": "/api/login.rs" },
 		{ "source": "/api/delete", "destination": "/api/delete.rs" },
-		{ "source": "/api/user/(.*)", "destination": "/api/user/[id].rs" },
-      {
-        "source": "/(.*)",
-        "destination": "/api/[...404].rs"
-      }
+		{ "source": "/api/user/(.*)", "destination": "/api/user/[id].rs" }
     ],
     "functions": {
       "api/**/*.rs": {
