@@ -62,7 +62,7 @@ path = "api/login.rs"
 name = "_id_"
 path = "api/user/[id].rs"
 
-# not found
-[[bin]]
-name = "not_found"
-path = "api/[...404].rs"
+# # not found
+# [[bin]]
+# name = "not_found"
+# path = "api/[...404].rs"
