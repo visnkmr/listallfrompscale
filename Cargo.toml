@@ -61,3 +61,8 @@ path = "api/login.rs"
 [[bin]]
 name = "_id_"
 path = "api/user/[id].rs"
+
+# not found
+[[bin]]
+name = "not_found"
+path = "api/[...404].rs"
