@@ -1,6 +1,12 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
     "rewrites": [
+		{ "source": "/listall", "destination": "/api/listall.rs" },
+		{ "source": "/create", "destination": "/api/create.rs" },
+		{ "source": "/update", "destination": "/api/update.rs" },
+		{ "source": "/login", "destination": "/api/login.rs" },
+		{ "source": "/delete", "destination": "/api/delete.rs" },
+		{ "source": "/user/(.*)", "destination": "/api/user/[id].rs" },
       {
         "source": "/(.*)",
         "destination": "/api/[...404].rs"
