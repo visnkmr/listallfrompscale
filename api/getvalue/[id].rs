@@ -1,5 +1,5 @@
 use serde::Serialize;
-use serde_json::json;
+use serde_json::{json, Value};
 use std::collections::HashMap;
 use url::Url;
 use listallfrompscale::{getfromquickfetch};
@@ -31,7 +31,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
         }
         Some(id) => {
             let data=getfromquickfetch(id.to_string()).unwrap().value;    
-            let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
+            let jdata:Value=serde_json::from_str(&data).unwrap();
             Ok(Response::builder()
             .status(StatusCode::OK)
             .header("Content-Type", "application/json")

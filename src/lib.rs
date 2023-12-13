@@ -133,15 +133,25 @@ fn trydbcon(){
     dotenv().ok();
     // let uname="vis".to_string();
     // let pwd="example".to_string();
-    let uname="123".to_string();
-    let pwd="asdsa".to_string();
+    let uname="345".to_string();
     // let data=printeuser("ram".to_string(),String::new()).unwrap().url;
     // let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
     // println!("{:?}",jdata);
     // println!("{:?}",data);
     // println!("{:?}",createuser("vis".to_string(), "example".to_string()));
     // println!("{:?}",deleteuser("meg".to_string(), "example".to_string()));
-    println!("{:?}",getfromquickfetch(uname).unwrap().value);
+    // let sdp_offer = json!({
+    //     "type": "offer",
+    //     "sdp": "v=0\r\no=- 8748985181318156403 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 43271 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 117.207.43.69\r\na=candidate:1766165686 1 udp 2113937151 793f23b1-475f-4f64-b97e-a44daeba377e.local 43271 typ host generation 0 network-cost 999\r\na=candidate:4156233652 1 udp 1677729535 117.207.43.69 43271 typ srflx raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:EV3N\r\na=ice-pwd:aEfq1TO9GBLyyET0xXzZXug5\r\na=fingerprint:sha-256 82:5F:DD:D3:5A:BE:17:9F:9D:66:EC:3E:BA:FU:CU:17:20:8E:CD:13:89:E3:8B:5C:55:AE:87:A2:25:D4:19:AA\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"
+    //  });
+    //  let tojson=serde_json::to_string(&sdp_offer).unwrap();
+    // //  print!("{:?}",tojson);
+    // let ddata=addtoquickfetch("345".to_string(),tojson ).unwrap();
+    // print!("{:?}",ddata);
+    let data=getfromquickfetch(uname).unwrap().value;
+    // println!("{:?}",data);
+    let jdata:Value=serde_json::from_str(&data).unwrap();
+    println!("{:?}",jdata);
 
     // println!("{:?}",adddatatouser("vis".to_string(), "google.com".to_string()));
     // println!("{:?}",printdata());
@@ -201,7 +211,7 @@ pub fn addtoquickfetch(id:String,value:String)-> Result<String,()>{
     let pool=pscalewrite();
 
     let mut _conn = pool.get_conn().unwrap();
-    let results:Vec<Row> = _conn .exec("REPLACE INTO redis (id,value) VALUES (?),(?));",(id,value)).unwrap();
+    let results:Vec<Row> = _conn .exec("REPLACE INTO redis (id,value) VALUES (?,?);",(id,value)).unwrap();
     
     Ok(format!("{:?}",results))
 }
