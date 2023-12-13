@@ -141,12 +141,23 @@ pub fn printdata()-> Result<String,()>{
     }
     Ok(svec)
 }
+
 pub fn printeuser(uid:String,pswd:String)-> Result<eachuser,()>{
     let pool=pscaleread();
     let salt = env::var("SALT").unwrap();
 
     let mut _conn = pool.get_conn().unwrap();
     let mut results:Vec<Row> = _conn .query(format!("SELECT * from urls WHERE uid=UNHEX(MD5('{}{}'))",uid,salt)).unwrap();
+    
+    Ok(parse_row_as_data(results.get(0).unwrap().clone()))
+}
+
+pub fn getfromquickfetch(id:String)-> Result<eachuser,()>{
+    let pool=pscaleread();
+//SELECT value FROM urls WHERE id = 'your-uuid';
+
+    let mut _conn = pool.get_conn().unwrap();
+    let mut results:Vec<Row> = _conn .query(format!("SELECT value from redis WHERE id='{}'))",id)).unwrap();
     
     Ok(parse_row_as_data(results.get(0).unwrap().clone()))
 }
@@ -165,6 +176,14 @@ pub fn createuser(uid:String,password:String)-> Result<String,()>{
 
     let mut _conn = pool.get_conn().unwrap();
     let results:Vec<Row> = _conn .exec("INSERT INTO urls (uid,pswd,url) VALUES (UNHEX(MD5(?)),UNHEX(MD5(?)),JSON_ARRAY());",(format!("{}{}",uid,salt),format!("{}{}",password,salt))).unwrap();
+    
+    Ok(format!("{:?}",results))
+}
+pub fn addtoquickfetch(id:String,value:String)-> Result<String,()>{
+    let pool=pscalewrite();
+
+    let mut _conn = pool.get_conn().unwrap();
+    let results:Vec<Row> = _conn .exec("REPLACE INTO redis (id,value) VALUES (?),(?));",(id,value)).unwrap();
     
     Ok(format!("{:?}",results))
 }

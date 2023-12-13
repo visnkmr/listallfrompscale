@@ -47,6 +47,14 @@ name = "create"
 path = "api/create.rs"
 
 [[bin]]
+name = "putredis"
+path = "api/putredis.rs"
+
+[[bin]]
+name = "getredis"
+path = "api/getredis.rs"
+
+[[bin]]
 name = "delete"
 path = "api/delete.rs"
 
@@ -61,6 +69,10 @@ path = "api/login.rs"
 [[bin]]
 name = "_id_"
 path = "api/user/[id].rs"
+
+[[bin]]
+name = "_value_"
+path = "api/getvalue/[id].rs"
 
 # # not found
 # [[bin]]
