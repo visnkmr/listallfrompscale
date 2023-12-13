@@ -30,7 +30,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
             });
         }
         Some(id) => {
-            let data=getfromquickfetch(id.to_string()).unwrap().url;
+            let data=getfromquickfetch(id.to_string()).unwrap().value;    
             let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
             Ok(Response::builder()
             .status(StatusCode::OK)

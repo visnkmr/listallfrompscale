@@ -110,12 +110,30 @@ fn parse_row_as_data(mut row: mysql::Row) -> eachuser {
     bill
     // ...
 }
+#[derive(Serialize, Deserialize, Default, Debug, Clone)]
+pub struct eachredisentry{
+    // pub id:String,
+    pub value:String,
+    // pub uid:String,
+    // pub pswd:String
+    
+}
+fn parse_value_from_data(mut row: mysql::Row) -> eachredisentry {
+    let mut bill = eachredisentry::default();
+
+    // bill.url = row.take("uid").unwrap();
+    bill.value = row.take("value").unwrap();
+    // bill.pswd = row.take("pswd").unwrap();
+
+    bill
+    // ...
+}
 #[test]
 fn trydbcon(){
     dotenv().ok();
     // let uname="vis".to_string();
     // let pwd="example".to_string();
-    let uname="asdsa".to_string();
+    let uname="123".to_string();
     let pwd="asdsa".to_string();
     // let data=printeuser("ram".to_string(),String::new()).unwrap().url;
     // let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
@@ -123,7 +141,7 @@ fn trydbcon(){
     // println!("{:?}",data);
     // println!("{:?}",createuser("vis".to_string(), "example".to_string()));
     // println!("{:?}",deleteuser("meg".to_string(), "example".to_string()));
-    println!("{:?}",checklogin(uname, pwd));
+    println!("{:?}",getfromquickfetch(uname).unwrap().value);
 
     // println!("{:?}",adddatatouser("vis".to_string(), "google.com".to_string()));
     // println!("{:?}",printdata());
@@ -152,14 +170,14 @@ pub fn printeuser(uid:String,pswd:String)-> Result<eachuser,()>{
     Ok(parse_row_as_data(results.get(0).unwrap().clone()))
 }
 
-pub fn getfromquickfetch(id:String)-> Result<eachuser,()>{
+pub fn getfromquickfetch(id:String)-> Result<eachredisentry,()>{
     let pool=pscaleread();
 //SELECT value FROM urls WHERE id = 'your-uuid';
 
     let mut _conn = pool.get_conn().unwrap();
-    let mut results:Vec<Row> = _conn .query(format!("SELECT value from redis WHERE id='{}'))",id)).unwrap();
-    
-    Ok(parse_row_as_data(results.get(0).unwrap().clone()))
+    let mut results:Vec<Row> = _conn .query(format!("SELECT value from redis WHERE id='{}'",id)).unwrap();
+    println!("{:?}",results.get(0).unwrap().clone());
+    Ok(parse_value_from_data(results.get(0).unwrap().clone()))
 }
 pub fn adddatatouser(uid:String,datatoadd:String)-> Result<String,()>{
     let pool=pscalewrite();
