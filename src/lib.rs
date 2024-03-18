@@ -13,17 +13,19 @@ use dotenv::dotenv;
 
 use rand::seq::SliceRandom;
 
-use std::{env, default, any::TypeId};
+use std::{any::TypeId, default, env, path::Path};
 
 // use diesel::*;
-use mysql::{Pool,  QueryResult, prelude::Queryable, Params, Row, params, PooledConn};
+use mysql::{params, prelude::Queryable, Params, Pool, PooledConn, QueryResult, Row, SslOpts};
 use serde::*;
 
 pub fn getconn(url:String)->Pool{
+    let mut ssl_opts = SslOpts::default();
+    ssl_opts = ssl_opts.with_root_cert_path(Some(Path::new("./ca.pem")));
+    
+    let builder = mysql::OptsBuilder::from_opts(mysql::Opts::from_url(&url).unwrap()).ssl_opts(ssl_opts.clone());
 
-    let builder = mysql::OptsBuilder::from_opts(mysql::Opts::from_url(&url).unwrap());
-
-    let pool = mysql::Pool::new(builder.ssl_opts(mysql::SslOpts::default())).unwrap();
+    let pool = mysql::Pool::new(builder.ssl_opts(ssl_opts)).unwrap();
     // let pool=PgConnection::establish(&url)
     // .unwrap_or_else(|_| panic!("Error connecting to {}", url));
 
@@ -68,29 +70,29 @@ pub fn pscaleread()->Pool{
 //     // printdata(&pscaleread());
 
 // }
-// pub fn createtable(pool:&Pool){
-//     let mut conn = pool.get_conn().unwrap();
-//     let createtable=format!(
-//         "CREATE TABLE ac_oses (
-//         date VARCHAR(50) PRIMARY KEY,
-//         os_name VARCHAR(50) NOT NULL,
-//         count INT NOT NULL
-//       );
-//       ");
-//     let mut saved=false;
-//     if let Ok(res) = conn.exec_drop(
-//         createtable,{}
-//     ) {
-//         // let vc:Vec<(String,i32)>=res;
-//         println!("added");
-//         saved=true;
-//     }
-//     if !saved {
+pub fn createtable(){
+    let pool=pscalewrite();
+    let mut conn = pool.get_conn().unwrap();
+    let createtable=format!(
+        "CREATE TABLE redis (
+        id NUMBER(50) PRIMARY KEY,
+        value VARCHAR(4000) NOT NULL
+      );
+      ");
+    let mut saved=false;
+    if let Ok(res) = conn.exec_drop(
+        createtable,{}
+    ) {
+        // let vc:Vec<(String,i32)>=res;
+        println!("added");
+        saved=true;
+    }
+    if !saved {
 
-//         println!("gone through");
-//     }
+        println!("gone through");
+    }
     
-// }
+}
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct eachuser{
     pub id:String,
@@ -131,6 +133,9 @@ fn parse_value_from_data(mut row: mysql::Row) -> eachredisentry {
 #[test]
 fn trydbcon(){
     dotenv().ok();
+    createtable();
+    let ab=Path::new("./ca.pem");
+    if(ab.exists()){
     // let uname="vis".to_string();
     // let pwd="example".to_string();
     let uname="345".to_string();
@@ -140,21 +145,26 @@ fn trydbcon(){
     // println!("{:?}",data);
     // println!("{:?}",createuser("vis".to_string(), "example".to_string()));
     // println!("{:?}",deleteuser("meg".to_string(), "example".to_string()));
-    // let sdp_offer = json!({
-    //     "type": "offer",
-    //     "sdp": "v=0\r\no=- 8748985181318156403 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 43271 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 117.207.43.69\r\na=candidate:1766165686 1 udp 2113937151 793f23b1-475f-4f64-b97e-a44daeba377e.local 43271 typ host generation 0 network-cost 999\r\na=candidate:4156233652 1 udp 1677729535 117.207.43.69 43271 typ srflx raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:EV3N\r\na=ice-pwd:aEfq1TO9GBLyyET0xXzZXug5\r\na=fingerprint:sha-256 82:5F:DD:D3:5A:BE:17:9F:9D:66:EC:3E:BA:FU:CU:17:20:8E:CD:13:89:E3:8B:5C:55:AE:87:A2:25:D4:19:AA\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"
-    //  });
-    //  let tojson=serde_json::to_string(&sdp_offer).unwrap();
-    // //  print!("{:?}",tojson);
-    // let ddata=addtoquickfetch("345".to_string(),tojson ).unwrap();
-    // print!("{:?}",ddata);
-    let data=getfromquickfetch(uname).unwrap().value;
+    let sdp_offer = json!({
+        "type": "offer",
+        "sdp": "v=0\r\no=- 8748985181318156403 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 43271 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 117.207.43.69\r\na=candidate:1766165686 1 udp 2113937151 793f23b1-475f-4f64-b97e-a44daeba377e.local 43271 typ host generation 0 network-cost 999\r\na=candidate:4156233652 1 udp 1677729535 117.207.43.69 43271 typ srflx raddr 0.0.0.0 rport 0 generation 0 network-cost 999\r\na=ice-ufrag:EV3N\r\na=ice-pwd:aEfq1TO9GBLyyET0xXzZXug5\r\na=fingerprint:sha-256 82:5F:DD:D3:5A:BE:17:9F:9D:66:EC:3E:BA:FU:CU:17:20:8E:CD:13:89:E3:8B:5C:55:AE:87:A2:25:D4:19:AA\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"
+     });
+     let tojson=serde_json::to_string(&sdp_offer).unwrap();
+    //  print!("{:?}",tojson);
+    let ddata=addtoquickfetch("345".to_string(),tojson ).unwrap();
+    print!("{:?}",ddata);
+    // let data=getfromquickfetch(uname).unwrap().value;
     // println!("{:?}",data);
-    let jdata:Value=serde_json::from_str(&data).unwrap();
-    println!("{:?}",jdata);
+    // let jdata:Value=serde_json::from_str(&data).unwrap();
+    // println!("{:?}",jdata);
 
     // println!("{:?}",adddatatouser("vis".to_string(), "google.com".to_string()));
     // println!("{:?}",printdata());
+    }
+    else{
+        println!("doesn't exist");
+    }
+    
 }
 pub fn printdata()-> Result<String,()>{
     let pool=pscaleread();
