@@ -73,16 +73,10 @@ pub fn pscaleread()->Pool{
 //     // printdata(&pscaleread());
 
 // }
-pub fn createtable(){
+pub fn createtable(command:&str){
     let pool=pscalewrite();
     let mut conn = pool.get_conn().unwrap();
-    let createtable=format!(
-        "CREATE TABLE `redis` (
-            `id` char(36) NOT NULL,
-            `value` json NOT NULL,
-            PRIMARY KEY (`id`)
-        );
-      ");
+    let createtable=format!("{}",command);
     let mut saved=false;
     if let Ok(res) = conn.exec_drop(
         createtable,{}
@@ -137,7 +131,52 @@ fn parse_value_from_data(mut row: mysql::Row) -> eachredisentry {
 #[test]
 fn trydbcon(){
     dotenv().ok();
-    createtable();
+    // createtable(
+    //     "CREATE TABLE `redis` (
+    //         `id` char(36) NOT NULL,
+    //         `value` json NOT NULL,
+    //         PRIMARY KEY (`id`)
+    //     );
+    //   ");
+    createtable("CREATE TABLE `urls` (
+        `id` int NOT NULL AUTO_INCREMENT,
+        `url` json NOT NULL,
+        `uid` binary(16) NOT NULL,
+        `pswd` binary(16) NOT NULL,
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `uid` (`uid`)
+    )");
+    // CREATE TABLE `appcenter_events` (
+    //     `id` int unsigned NOT NULL AUTO_INCREMENT,
+    //     `date` varchar(50) NOT NULL,
+    //     `count` int NOT NULL,
+    //     PRIMARY KEY (`id`)
+    // )
+
+
+
+    // CREATE TABLE `ac_oses` (
+    //     `date` varchar(50) NOT NULL,
+    //     `os_name` varchar(500) NOT NULL,
+    //     `count` int NOT NULL,
+    //     PRIMARY KEY (`date`)
+    // )
+
+
+
+    // CREATE TABLE `ac_events` (
+    //     `date` varchar(50) NOT NULL,
+    //     `count` int NOT NULL,
+    //     PRIMARY KEY (`date`)
+    // )
+
+    // CREATE TABLE `ac_eventlist` (
+    //     `date` varchar(50) NOT NULL,
+    //     `eventslist` varchar(2000) NOT NULL,
+    //     `count` int NOT NULL,
+    //     PRIMARY KEY (`date`)
+    // )
+
 //     let file_contents = fs::read_to_string("./ca.pem")
 //     .expect("Should have been able to read the file");
 // let file_contents=serde_json::to_string(&file_contents).unwrap();
