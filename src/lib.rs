@@ -218,6 +218,11 @@ pub fn adddatatouser(uid:String,datatoadd:String)-> Result<String,()>{
     
     Ok(format!("{:?}",results))
 }
+#[test]
+fn testcreate(){
+    dotenv().ok();
+    createuser("test".to_string(),"aiven".to_string()).unwrap();
+}
 pub fn createuser(uid:String,password:String)-> Result<String,()>{
     let pool=pscalewrite();
     let salt = env::var("SALT").unwrap();

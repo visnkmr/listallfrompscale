@@ -145,3 +145,64 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
         }
     }
 }
+
+use dotenv::dotenv;
+#[test]
+fn testlogin(){
+    dotenv().ok();
+    let usak=env::var("USAK").unwrap();
+            let redis = redis::Client::open(usak).unwrap();
+
+            let ratelimit = RateLimit::builder()
+                .redis(redis.clone())
+                .limiter(Limiter::FixedWindow {
+                    tokens: 1,
+                    window: Duration::from_millis(5000),
+                })
+                .build().unwrap();
+
+            // let response = ;
+            let ip="10";
+            let payload=Payload{
+                uid:"test".to_string(),
+                pswd:"aiven".to_string()
+            };
+            match ratelimit.limit(ip).unwrap() {
+                rsp::Success { .. } => {
+                    // let starter = choose_starter();
+                    // let data=printeuser(payload.uid.clone(), payload.datatoadd.clone()).unwrap().url;
+                    // let jdata:Vec<String>=serde_json::from_str(&data).unwrap();
+                    // if(req.method()==Method::POST){
+                        match(checklogin(payload.uid.clone(), payload.pswd.clone())){
+                            Ok(_) => {
+                                println!("success");
+                            },
+                            Err(_) => {
+                                println!("failed");
+                            },
+                        }
+                        
+                    // }
+                    // else{
+                    //     Ok(Response::builder()
+                    // .status(StatusCode::BAD_REQUEST)
+                    // .header("Content-Type", "application/json")
+                    // // .header("Access-Control-Allow-Origin", "*")
+                    // // .header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+                    // .body(
+                    //     json!({
+                    //     "FAILED": "BAD REQUEST",
+                    //     "request":format!("{:?}",req),
+                    //     })
+                    //     .to_string()
+                    //     .into(),
+                    // )?)
+                    // }
+                    // let jdata=serde_json::to_value(&data).unwrap();
+                    
+                },
+                rsp::Failure { .. } => {
+                    println!("rate limited");
+                }
+            }
+}
