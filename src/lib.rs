@@ -12,25 +12,26 @@ use dotenv::dotenv;
 //the codeberg and gitea server stats getting api
 
 use rand::seq::SliceRandom;
+use tokio::runtime::Runtime;
 
 use std::{any::TypeId, default, env, path::Path, fs};
 
 // use diesel::*;
 
-use diesel::sql_types::Text;
-use diesel::prelude::*;
+// use diesel::sql_types::Text;
+// use diesel::prelude::*;
 use mysql::{params, prelude::Queryable, Params, Pool, PooledConn, QueryResult, Row, SslOpts};
 use serde::*;
 
 pub fn getconn(url:String)->Pool{
-    let mut ssl_opts = SslOpts::default().with_danger_accept_invalid_certs(true);
+    // let mut ssl_opts = SslOpts::default().with_danger_accept_invalid_certs(true);
     // let ca_cert=env::var("CA_CERT").unwrap();
     // let dec:String=serde_json::from_str(&ca_cert).unwrap();
     // ssl_opts = ssl_opts.with_root_cert_path(Some((&dec.clone())));
     
-    let builder = mysql::OptsBuilder::from_opts(mysql::Opts::from_url(&url).unwrap()).ssl_opts(ssl_opts.clone());
+    let builder = mysql::OptsBuilder::from_opts(mysql::Opts::from_url(&url).unwrap());
 
-    let pool = mysql::Pool::new(builder.ssl_opts(ssl_opts)).unwrap();
+    let pool = mysql::Pool::new(builder).unwrap();
     // let pool=PgConnection::establish(&url)
     // .unwrap_or_else(|_| panic!("Error connecting to {}", url));
 
@@ -194,12 +195,12 @@ pub fn printdata()-> Result<String,()>{
     }
     Ok(svec)
 }
-use diesel::{Connection, MysqlConnection};
-fn getdbconn() -> diesel::MysqlConnection {
-    let url = env::var("DATAR").unwrap();
+// use diesel::{Connection as dieselconn, MysqlConnection};
+// fn getdbconn() -> diesel::MysqlConnection {
+//     let url = env::var("DATAR").unwrap();
 
-    MysqlConnection::establish(&url).unwrap()
-}
+//     MysqlConnection::establish(&url).unwrap()
+// }
 
 #[test]
 fn tryoute(){
@@ -212,25 +213,25 @@ pub fn printeuser(uid:String,pswd:String)-> Result<eachuser,()>{
 
     let salt = env::var("SALT").unwrap();
 
-let mut conn = getdbconn();
-    let mut query_str = format!(
-        "SELECT * FROM urls WHERE uid = UNHEX(MD5('{}{}')) ",
-        uid,salt
-    );
-let res=diesel::sql_query(query_str)
-            // .execute(&mut conn)
-            .load::<eachuser>(&mut conn)
-            .expect("Not found");
-        // print!("{:?}",res);
-            Ok(res.get(0).unwrap().clone())
+// let mut conn = getdbconn();
+//     let mut query_str = format!(
+//         "SELECT * FROM urls WHERE uid = UNHEX(MD5('{}{}')) ",
+//         uid,salt
+//     );
+// let res=diesel::sql_query(query_str)
+//             // .execute(&mut conn)
+//             .load::<eachuser>(&mut conn)
+//             .expect("Not found");
+//         // print!("{:?}",res);
+//             Ok(res.get(0).unwrap().clone())
 
-    // let pool=pscaleread();
+    let pool=pscaleread();
 
 
-    // let mut _conn = pool.get_conn().unwrap();
-    // let mut results:Vec<Row> = _conn .query(format!("SELECT * from urls WHERE uid=UNHEX(MD5('{}{}'))",uid,salt)).unwrap();
+    let mut _conn = pool.get_conn().unwrap();
+    let mut results:Vec<Row> = _conn .query(format!("SELECT * from urls WHERE uid=UNHEX(MD5('{}{}'))",uid,salt)).unwrap();
     
-    // Ok(parse_row_as_data(results.get(0).unwrap().clone()))
+    Ok(parse_row_as_data(results.get(0).unwrap().clone()))
 }
 
 pub fn getfromquickfetch(id:String)-> Result<eachredisentry,()>{

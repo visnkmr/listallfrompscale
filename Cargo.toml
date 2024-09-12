@@ -16,8 +16,14 @@ dotenv = "0.15.0"
 prefstore= {git="https://github.com/visnkmr/prefstore.git"}
 # prefstore= {path="../../rust/prefstore/prefstore/"}
 serde = {version = "1.0.163", features = ["derive"]}
-mysql="*"
-diesel = { version = "2.2.4",features=["mysql"]}
+# Lets say that we want to use the `rustls-tls` feature:
+mysql = { version = "*", default-features = false, features = ["minimal"] }
+# Previous line disables default mysql features,
+# so now we need to choose desired mysql_common features:
+mysql_common = { version = "*", default-features = false}
+# diesel = { version = "2.2.4",features=["mysql"]}
+# diesel-async = { version = "0.3.1", features = ["mysql"] }
+# sqlx={version="0.8.2",features=["mysql","runtime-tokio-rustls"]}
 
 url = "2.4.1"
 rand = "0.8.5"
