@@ -100,11 +100,12 @@ pub fn createtable(){
     }
     
 }
-#[derive(QueryableByName,Serialize, Deserialize, Default, Debug, Clone)]
+#[derive(Serialize, Deserialize, Default, Debug, Clone)]
+// #[derive(QueryableByName,Serialize, Deserialize, Default, Debug, Clone)]
 pub struct eachuser{
-    #[sql_type = "Text"]
+    // #[sql_type = "Text"]
     pub id:String,
-    #[sql_type = "Text"]
+    // #[sql_type = "Text"]
     pub url:String,
     // pub uid:String,
     // pub pswd:String
