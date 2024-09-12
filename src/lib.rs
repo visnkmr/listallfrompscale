@@ -16,6 +16,9 @@ use rand::seq::SliceRandom;
 use std::{any::TypeId, default, env, path::Path, fs};
 
 // use diesel::*;
+
+use diesel::sql_types::Text;
+use diesel::prelude::*;
 use mysql::{params, prelude::Queryable, Params, Pool, PooledConn, QueryResult, Row, SslOpts};
 use serde::*;
 
@@ -96,9 +99,11 @@ pub fn createtable(){
     }
     
 }
-#[derive(Serialize, Deserialize, Default, Debug, Clone)]
+#[derive(QueryableByName,Serialize, Deserialize, Default, Debug, Clone)]
 pub struct eachuser{
+    #[sql_type = "Text"]
     pub id:String,
+    #[sql_type = "Text"]
     pub url:String,
     // pub uid:String,
     // pub pswd:String
@@ -189,15 +194,43 @@ pub fn printdata()-> Result<String,()>{
     }
     Ok(svec)
 }
+use diesel::{Connection, MysqlConnection};
+fn getdbconn() -> diesel::MysqlConnection {
+    let url = env::var("DATAR").unwrap();
 
+    MysqlConnection::establish(&url).unwrap()
+}
+
+#[test]
+fn tryoute(){
+    dotenv().ok();
+    // pscaleread();
+    print!("{:?}",printeuser("".to_string(), "".to_string()).unwrap());
+    
+}
 pub fn printeuser(uid:String,pswd:String)-> Result<eachuser,()>{
-    let pool=pscaleread();
+
     let salt = env::var("SALT").unwrap();
 
-    let mut _conn = pool.get_conn().unwrap();
-    let mut results:Vec<Row> = _conn .query(format!("SELECT * from urls WHERE uid=UNHEX(MD5('{}{}'))",uid,salt)).unwrap();
+let mut conn = getdbconn();
+    let mut query_str = format!(
+        "SELECT * FROM urls WHERE uid = UNHEX(MD5('{}{}')) ",
+        uid,salt
+    );
+let res=diesel::sql_query(query_str)
+            // .execute(&mut conn)
+            .load::<eachuser>(&mut conn)
+            .expect("Not found");
+        // print!("{:?}",res);
+            Ok(res.get(0).unwrap().clone())
+
+    // let pool=pscaleread();
+
+
+    // let mut _conn = pool.get_conn().unwrap();
+    // let mut results:Vec<Row> = _conn .query(format!("SELECT * from urls WHERE uid=UNHEX(MD5('{}{}'))",uid,salt)).unwrap();
     
-    Ok(parse_row_as_data(results.get(0).unwrap().clone()))
+    // Ok(parse_row_as_data(results.get(0).unwrap().clone()))
 }
 
 pub fn getfromquickfetch(id:String)-> Result<eachredisentry,()>{

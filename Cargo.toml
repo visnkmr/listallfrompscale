@@ -17,7 +17,7 @@ prefstore= {git="https://github.com/visnkmr/prefstore.git"}
 # prefstore= {path="../../rust/prefstore/prefstore/"}
 serde = {version = "1.0.163", features = ["derive"]}
 mysql="*"
-# diesel = { version = "2.1.0", features = ["postgres"] }
+diesel = { version = "2.2.4",features=["mysql"]}
 
 url = "2.4.1"
 rand = "0.8.5"
