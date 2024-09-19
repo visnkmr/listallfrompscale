@@ -39,11 +39,11 @@ pub fn getconn(url:String)->Pool{
     pool
 }
 pub fn pscalewrite()->Pool{
-    let url = env::var("DATAW").unwrap();
+    let url = env::var("DATAO").unwrap();
     getconn(url)
 }
 pub fn pscaleread()->Pool{
-    let url = env::var("DATAR").unwrap();
+    let url = env::var("DATAO").unwrap();
     getconn(url)
 }
 // pub fn addtosessiondb(datatoadd:Vec<sessioncount>){
@@ -78,17 +78,29 @@ pub fn pscaleread()->Pool{
 // }
 pub fn createtable(){
     let pool=pscalewrite();
+    
     let mut conn = pool.get_conn().unwrap();
-    let createtable=format!(
-        "CREATE TABLE `redis` (
-            `id` char(36) NOT NULL,
-            `value` json NOT NULL,
-            PRIMARY KEY (`id`)
-        );
+    let createurltable=format!(
+        "
+        CREATE TABLE 'urls' (
+            'id' varchar(65535) NOT NULL,
+            'url' json NOT NULL,
+            PRIMARY KEY ('id'),
+            UNIQUE KEY 'id' ('id')
+          );
       ");
+      
+    //   let createredistable=format!(
+    //     "
+    //     CREATE TABLE `redis` (
+    //         `id` char(36) NOT NULL,
+    //         `value` json NOT NULL,
+    //         PRIMARY KEY (`id`)
+    //     );
+    //   ");
     let mut saved=false;
     if let Ok(res) = conn.exec_drop(
-        createtable,{}
+        createurltable,{}
     ) {
         // let vc:Vec<(String,i32)>=res;
         println!("added");
@@ -230,7 +242,7 @@ pub fn printeuser(uid:String,pswd:String)-> Result<eachuser,()>{
 
 
     let mut _conn = pool.get_conn().unwrap();
-    let mut results:Vec<Row> = _conn .query(format!("SELECT * from urls WHERE uid=UNHEX(MD5('{}{}'))",uid,salt)).unwrap();
+    let mut results:Vec<Row> = _conn .query(format!("SELECT * from urls WHERE id=UNHEX(MD5('{}{}'))",uid,salt)).unwrap();
     
     Ok(parse_row_as_data(results.get(0).unwrap().clone()))
 }
@@ -249,7 +261,7 @@ pub fn adddatatouser(uid:String,datatoadd:String)-> Result<String,()>{
     let salt = env::var("SALT").unwrap();
 
     let mut _conn = pool.get_conn().unwrap();
-    let results:Vec<Row> = _conn .exec(("UPDATE urls SET url = JSON_ARRAY_APPEND(url, '$', ?) WHERE uid=UNHEX(MD5(?));"),(datatoadd,format!("{}{}",uid,salt))).unwrap();
+    let results:Vec<Row> = _conn .exec(("UPDATE urls SET url = JSON_ARRAY_APPEND(url, '$', ?) WHERE id=UNHEX(MD5(?));"),(datatoadd,format!("{}{}",uid,salt))).unwrap();
     
     Ok(format!("{:?}",results))
 }
@@ -263,7 +275,7 @@ pub fn createuser(uid:String,password:String)-> Result<String,()>{
     let salt = env::var("SALT").unwrap();
 
     let mut _conn = pool.get_conn().unwrap();
-    let results:Vec<Row> = _conn .exec("INSERT INTO urls (uid,pswd,url) VALUES (UNHEX(MD5(?)),UNHEX(MD5(?)),JSON_ARRAY());",(format!("{}{}",uid,salt),format!("{}{}",password,salt))).unwrap();
+    let results:Vec<Row> = _conn .exec("INSERT INTO urls (id,url) VALUES (UNHEX(MD5(?)),JSON_ARRAY());",(format!("{}{}",uid,salt),)).unwrap();
     
     Ok(format!("{:?}",results))
 }
@@ -280,7 +292,7 @@ pub fn checklogin(uid:String,password:String)-> Result<String,()>{
     let salt = env::var("SALT").unwrap();
 
     let mut _conn = pool.get_conn().unwrap();
-    let results:Vec<Row> = _conn .exec("SELECT * FROM urls WHERE uid = UNHEX(MD5(?)) AND pswd = UNHEX(MD5(?)) ;",(format!("{}{}",uid,salt),format!("{}{}",password,salt))).unwrap();
+    let results:Vec<Row> = _conn .exec("SELECT * FROM urls WHERE id = UNHEX(MD5(?));",(format!("{}{}",uid,salt),format!("{}{}",password,salt))).unwrap();
     if(!results.is_empty()){
         Ok("Success".to_string())
     }
@@ -294,7 +306,7 @@ pub fn deleteuser(uid:String,password:String)-> Result<String,()>{
     let salt = env::var("SALT").unwrap();
 
     let mut _conn = pool.get_conn().unwrap();
-    let results:Vec<Row> = _conn .exec("DELETE FROM urls WHERE uid=UNHEX(MD5(?));",(format!("{}{}",uid,salt),)).unwrap();
+    let results:Vec<Row> = _conn .exec("DELETE FROM urls WHERE id=UNHEX(MD5(?));",(format!("{}{}",uid,salt),)).unwrap();
     
     Ok(format!("{:?}",results))
 }
