@@ -83,7 +83,7 @@ pub fn createtable(){
     let createurltable=format!(
         "
         CREATE TABLE `urls` (
-            `id` varchar(255) NOT NULL,
+            `id` binary(16) NOT NULL,
             `url` json NOT NULL,
             PRIMARY KEY (`id`)
           );
