@@ -20,7 +20,7 @@ use std::{any::TypeId, default, env, path::Path, fs};
 
 // use diesel::sql_types::Text;
 // use diesel::prelude::*;
-use mysql::{params, prelude::Queryable, Params, Pool, PooledConn, QueryResult, Row, SslOpts};
+use mysql::{params, prelude::Queryable, Binary, Params, Pool, PooledConn, QueryResult, Row, SslOpts};
 use serde::*;
 
 pub fn getconn(url:String)->Pool{
@@ -116,16 +116,17 @@ pub fn createtable(){
 pub struct eachuser{
     // #[sql_type = "Text"]
     pub id:String,
+    // pub id:Vec<u8>,
     // #[sql_type = "Text"]
     pub url:String,
     // pub uid:String,
     // pub pswd:String
     
 }
-fn parse_row_as_data(mut row: mysql::Row) -> eachuser {
+fn parse_row_as_data(uid:String,mut row: mysql::Row) -> eachuser {
     let mut bill = eachuser::default();
 
-    bill.id = row.take("id").unwrap();
+    bill.id = uid;
     // bill.url = row.take("uid").unwrap();
     bill.url = row.take("url").unwrap();
     // bill.pswd = row.take("pswd").unwrap();
@@ -203,7 +204,7 @@ pub fn printdata()-> Result<String,()>{
     let mut svec=String::new();
     for eacha in &results{
 
-        svec.push_str(&format!("{:?}",parse_row_as_data(eacha.clone())));
+        svec.push_str(&format!("{:?}",parse_row_as_data("all".to_string(),eacha.clone())));
     }
     Ok(svec)
 }
@@ -243,7 +244,7 @@ pub fn printeuser(uid:String,pswd:String)-> Result<eachuser,()>{
     let mut _conn = pool.get_conn().unwrap();
     let mut results:Vec<Row> = _conn .query(format!("SELECT * from urls WHERE id=UNHEX(MD5('{}{}'))",uid,salt)).unwrap();
     
-    Ok(parse_row_as_data(results.get(0).unwrap().clone()))
+    Ok(parse_row_as_data(uid,results.get(0).unwrap().clone()))
 }
 
 pub fn getfromquickfetch(id:String)-> Result<eachredisentry,()>{
