@@ -391,7 +391,7 @@ pub fn createuser(uid:String,_password:String)-> Result<String,()>{
             return Err(());
         }
     };
-    let results:Vec<Row> = match _conn.exec("INSERT INTO urls (id,url) VALUES (UNHEX(MD5(?)),JSON_ARRAY());",(format!("{}{}",uid,salt),)) {
+    let results:Vec<Row> = match _conn.exec("INSERT INTO urls (uid,url) VALUES (UNHEX(MD5(?)),JSON_ARRAY());",(format!("{}{}",uid,salt),)) {
         Ok(results) => results,
         Err(e) => {
             eprintln!("Error executing query: {}", e);
@@ -647,12 +647,12 @@ pub fn choose_starter() -> String {
     starter.to_string()
 }
 
-// #[tokio::main]
+#[test]
 //  pub async fn main()-> Result<(), Box<dyn std::error::Error>>{
  pub fn testdata()-> Result<(), Box<dyn std::error::Error>>{
 
     dotenv().ok();
-    // println!("{:?}",printdata());
+    println!("{:?}",printdata());
     // commitstojson();
     // let today = Utc::now();
     // let date_28_days_ago = &(today - chrono::Duration::days(27)).format("%Y-%m-%d").to_string();
@@ -704,27 +704,27 @@ fn print_key_value_pairs(value: &Value) {
         }
     }
 }
-#[test]
-fn datetest(){
-    let g=match NaiveDateTime::parse_from_str("2023-05-12T15:01:34+05:30","%Y-%m-%dT%H:%M:%S%z") {
-        Ok(dt) => dt,
-        Err(e) => {
-            eprintln!("Error parsing datetime: {}", e);
-            return;
-        }
-    };
+// #[test]
+// fn datetest(){
+//     let g=match NaiveDateTime::parse_from_str("2023-05-12T15:01:34+05:30","%Y-%m-%dT%H:%M:%S%z") {
+//         Ok(dt) => dt,
+//         Err(e) => {
+//             eprintln!("Error parsing datetime: {}", e);
+//             return;
+//         }
+//     };
                                 
-    // let g1=DateTime::parse_from_str("2022-12-06T18:31:45","%Y-%m-%dT%H:%M:%S")
-    //                                 .unwrap();
+//     // let g1=DateTime::parse_from_str("2022-12-06T18:31:45","%Y-%m-%dT%H:%M:%S")
+//     //                                 .unwrap();
 
-    let ndt = match NaiveDateTime::parse_from_str("2022-12-06T18:31:45Z", "%Y-%m-%dT%H:%M:%SZ") {
-        Ok(dt) => dt,
-        Err(e) => {
-            eprintln!("Error parsing datetime: {}", e);
-            return;
-        }
-    };
+//     let ndt = match NaiveDateTime::parse_from_str("2022-12-06T18:31:45Z", "%Y-%m-%dT%H:%M:%SZ") {
+//         Ok(dt) => dt,
+//         Err(e) => {
+//             eprintln!("Error parsing datetime: {}", e);
+//             return;
+//         }
+//     };
 
-                                    // .with_timezone(&FixedOffset::east_opt(5*3600+30*60).unwrap());
-}
+//                                     // .with_timezone(&FixedOffset::east_opt(5*3600+30*60).unwrap());
+// }
 
