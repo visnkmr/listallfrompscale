@@ -1,27 +1,10 @@
 // use std::{env, any::TypeId};
-use chrono::{DateTime, FixedOffset, NaiveDateTime, Utc};
-// use commitstojson::commitstojson;
-// use pscale::*;
-use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
-use reqwest::{blocking::Client, header::{HeaderMap, CONTENT_TYPE, AUTHORIZATION}};
-use serde::{Serialize, Deserialize, Deserializer};
-use serde_json::{Value, json};
 use dotenv::dotenv;
-// mod pscale;
-// #[test]
-//the codeberg and gitea server stats getting api
-
+use mysql::{prelude::Queryable, Pool, Row};
 use rand::seq::SliceRandom;
-use tokio::runtime::Runtime;
-
-use std::{any::TypeId, default, env, path::Path, fs};
-
-// use diesel::*;
-
-// use diesel::sql_types::Text;
-// use diesel::prelude::*;
-use mysql::{params, prelude::Queryable, Binary, Params, Pool, PooledConn, QueryResult, Row, SslOpts};
-use serde::*;
+use serde::{Serialize, Deserialize};
+use serde_json::Value;
+use std::env;
 
 pub fn getconn(url:String)->Pool{
     // let mut ssl_opts = SslOpts::default().with_danger_accept_invalid_certs(true);
@@ -33,7 +16,7 @@ pub fn getconn(url:String)->Pool{
         Ok(opts) => opts,
         Err(e) => {
             eprintln!("Error parsing database URL: {}", e);
-            return mysql::Pool::new(mysql::OptsBuilder::default());
+            return mysql::Pool::new(mysql::OptsBuilder::default()).unwrap();
         }
     });
 
@@ -41,7 +24,7 @@ pub fn getconn(url:String)->Pool{
         Ok(pool) => pool,
         Err(e) => {
             eprintln!("Error creating database pool: {}", e);
-            return mysql::Pool::new(mysql::OptsBuilder::default());
+            return mysql::Pool::new(mysql::OptsBuilder::default()).unwrap();
         }
     };
     // let pool=PgConnection::establish(&url)
@@ -55,7 +38,7 @@ pub fn pscalewrite()->Pool{
         Ok(url) => url,
         Err(e) => {
             eprintln!("Error reading DATAW environment variable: {}", e);
-            return mysql::Pool::new(mysql::OptsBuilder::default());
+            return mysql::Pool::new(mysql::OptsBuilder::default()).unwrap();
         }
     };
     getconn(url)
@@ -65,7 +48,7 @@ pub fn pscaleread()->Pool{
         Ok(url) => url,
         Err(e) => {
             eprintln!("Error reading DATAR environment variable: {}", e);
-            return mysql::Pool::new(mysql::OptsBuilder::default());
+            return mysql::Pool::new(mysql::OptsBuilder::default()).unwrap();
         }
     };
     getconn(url)
@@ -128,7 +111,7 @@ pub fn createtable(){
     //     );
     //   ");
     let mut saved=false;
-    if let Ok(res) = conn.exec_drop(
+    if let Ok(_res) = conn.exec_drop(
         createurltable,{}
     ) {
         // let vc:Vec<(String,i32)>=res;
@@ -143,7 +126,7 @@ pub fn createtable(){
 }
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 // #[derive(QueryableByName,Serialize, Deserialize, Default, Debug, Clone)]
-pub struct eachuser{
+pub struct Eachuser{
     // #[sql_type = "Text"]
     pub id:String,
     // pub id:Vec<u8>,
@@ -153,15 +136,15 @@ pub struct eachuser{
     // pub pswd:String
     
 }
-fn parse_row_as_data(uid:String,mut row: mysql::Row) -> eachuser {
-    let mut bill = eachuser::default();
+fn parse_row_as_data(uid:String,mut row: mysql::Row) -> Eachuser {
+    let mut bill = Eachuser::default();
 
     bill.id = uid;
     // bill.url = row.take("uid").unwrap();
     bill.url = match row.take("url") {
-        Ok(url) => url,
-        Err(e) => {
-            eprintln!("Error taking url from row: {}", e);
+        Some(url) => url,
+        None => {
+            eprintln!("Error taking url from row");
             String::new()
         }
     };
@@ -171,21 +154,21 @@ fn parse_row_as_data(uid:String,mut row: mysql::Row) -> eachuser {
     // ...
 }
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
-pub struct eachredisentry{
+pub struct Eachredisentry{
     // pub id:String,
     pub value:String,
     // pub uid:String,
     // pub pswd:String
     
 }
-fn parse_value_from_data(mut row: mysql::Row) -> eachredisentry {
-    let mut bill = eachredisentry::default();
+fn parse_value_from_data(mut row: mysql::Row) -> Eachredisentry {
+    let mut bill = Eachredisentry::default();
 
     // bill.url = row.take("uid").unwrap();
     bill.value = match row.take("value") {
-        Ok(value) => value,
-        Err(e) => {
-            eprintln!("Error taking value from row: {}", e);
+        Some(value) => value,
+        None => {
+            eprintln!("Error taking value from row");
             String::new()
         }
     };
@@ -239,7 +222,7 @@ fn trydbcon(){
 }
 pub fn printdata()-> Result<String,()>{
     let pool=pscaleread();
-    let salt = match env::var("SALT") {
+    let _salt = match env::var("SALT") {
         Ok(salt) => salt,
         Err(e) => {
             eprintln!("Error reading SALT environment variable: {}", e);
@@ -254,7 +237,7 @@ pub fn printdata()-> Result<String,()>{
             return Err(());
         }
     };
-    let mut results:Vec<Row> = match _conn.query(format!("SELECT * from urls")) {
+    let results:Vec<Row> = match _conn.query(format!("SELECT * from urls")) {
         Ok(results) => results,
         Err(e) => {
             eprintln!("Error querying database: {}", e);
@@ -282,7 +265,7 @@ fn tryoute(){
     print!("{:?}",printeuser("".to_string(), "".to_string()).unwrap());
     
 }
-pub fn printeuser(uid:String,pswd:String)-> Result<eachuser,()>{
+pub fn printeuser(uid:String,_pswd:String)-> Result<Eachuser,()>{
 
     let salt = match env::var("SALT") {
         Ok(salt) => salt,
@@ -314,7 +297,7 @@ pub fn printeuser(uid:String,pswd:String)-> Result<eachuser,()>{
             return Err(());
         }
     };
-    let mut results:Vec<Row> = match _conn.query(format!("SELECT * from urls WHERE id=UNHEX(MD5('{}{}'))",uid,salt)) {
+    let results:Vec<Row> = match _conn.query(format!("SELECT * from urls WHERE id=UNHEX(MD5('{}{}'))",uid,salt)) {
         Ok(results) => results,
         Err(e) => {
             eprintln!("Error querying database: {}", e);
@@ -331,7 +314,7 @@ pub fn printeuser(uid:String,pswd:String)-> Result<eachuser,()>{
     }))
 }
 
-pub fn getfromquickfetch(id:String)-> Result<eachredisentry,()>{
+pub fn getfromquickfetch(id:String)-> Result<Eachredisentry,()>{
     let pool=pscaleread();
 //SELECT value FROM urls WHERE id = 'your-uuid';
 
@@ -342,7 +325,7 @@ pub fn getfromquickfetch(id:String)-> Result<eachredisentry,()>{
             return Err(());
         }
     };
-    let mut results:Vec<Row> = match _conn.query(format!("SELECT value from redis WHERE id='{}'",id)) {
+    let results:Vec<Row> = match _conn.query(format!("SELECT value from redis WHERE id='{}'",id)) {
         Ok(results) => results,
         Err(e) => {
             eprintln!("Error querying database: {}", e);
@@ -376,7 +359,7 @@ pub fn adddatatouser(uid:String,datatoadd:String)-> Result<String,()>{
             return Err(());
         }
     };
-    let results:Vec<Row> = match _conn.exec(("UPDATE urls SET url = JSON_ARRAY_APPEND(url, '$', ?) WHERE id=UNHEX(MD5(?));"),(datatoadd,format!("{}{}",uid,salt))) {
+    let results:Vec<Row> = match _conn.exec("UPDATE urls SET url = JSON_ARRAY_APPEND(url, '$', ?) WHERE id=UNHEX(MD5(?));",(datatoadd,format!("{}{}",uid,salt))) {
         Ok(results) => results,
         Err(e) => {
             eprintln!("Error executing query: {}", e);
@@ -391,7 +374,7 @@ fn testcreate(){
     dotenv().ok();
     createuser("test".to_string(),"aiven".to_string()).unwrap();
 }
-pub fn createuser(uid:String,password:String)-> Result<String,()>{
+pub fn createuser(uid:String,_password:String)-> Result<String,()>{
     let pool=pscalewrite();
     let salt = match env::var("SALT") {
         Ok(salt) => salt,
@@ -438,7 +421,7 @@ pub fn addtoquickfetch(id:String,value:String)-> Result<String,()>{
     
     Ok(format!("{:?}",results))
 }
-pub fn checklogin(uid:String,password:String)-> Result<String,()>{
+pub fn checklogin(uid:String,_password:String)-> Result<String,()>{
     let pool=pscalewrite();
     let salt = match env::var("SALT") {
         Ok(salt) => salt,
@@ -455,14 +438,14 @@ pub fn checklogin(uid:String,password:String)-> Result<String,()>{
             return Err(());
         }
     };
-    let results:Vec<Row> = match _conn.exec("SELECT * FROM urls WHERE id = UNHEX(MD5(?));",(format!("{}{}",uid,salt),format!("{}{}",password,salt))) {
+    let results:Vec<Row> = match _conn.exec("SELECT * FROM urls WHERE id = UNHEX(MD5(?));",(format!("{}{}",uid,salt),)) {
         Ok(results) => results,
         Err(e) => {
             eprintln!("Error executing query: {}", e);
             return Err(());
         }
     };
-    if(!results.is_empty()){
+    if !results.is_empty(){
         Ok("Success".to_string())
     }
     else{
@@ -470,7 +453,7 @@ pub fn checklogin(uid:String,password:String)-> Result<String,()>{
     }
     
 }
-pub fn deleteuser(uid:String,password:String)-> Result<String,()>{
+pub fn deleteuser(uid:String,_password:String)-> Result<String,()>{
     let pool=pscalewrite();
     let salt = match env::var("SALT") {
         Ok(salt) => salt,

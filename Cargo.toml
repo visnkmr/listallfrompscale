@@ -57,10 +57,6 @@ name = "putredis"
 path = "api/putredis.rs"
 
 [[bin]]
-name = "getredis"
-path = "api/getredis.rs"
-
-[[bin]]
 name = "delete"
 path = "api/delete.rs"
 
