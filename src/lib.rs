@@ -139,8 +139,20 @@ pub struct Eachuser{
 fn parse_row_as_data(uid:String,mut row: mysql::Row) -> Eachuser {
     let mut bill = Eachuser::default();
 
-    bill.id = uid;
-    // bill.url = row.take("uid").unwrap();
+    // Get the binary ID and convert it to hex string for display
+    bill.id = match row.take::<Vec<u8>, _>("uid") {
+        Some(binary_id) => {
+            // Convert binary to hex string
+            let hex_string: String = binary_id.iter().map(|byte| format!("{:02x}", byte)).collect();
+            println!("Decoded UID (hex): {}", hex_string);
+            hex_string
+        },
+        None => {
+            eprintln!("Error taking id from row");
+            String::new()
+        }
+    };
+    
     bill.url = match row.take("url") {
         Some(url) => url,
         None => {
@@ -297,7 +309,9 @@ pub fn printeuser(uid:String,_pswd:String)-> Result<Eachuser,()>{
             return Err(());
         }
     };
-    let results:Vec<Row> = match _conn.query(format!("SELECT * from urls WHERE id=UNHEX(MD5('{}{}'))",uid,salt)) {
+    let qtosend=format!("SELECT * from urls WHERE uid=UNHEX(MD5('{}{}'))",uid,salt);
+    println!("{}",qtosend);
+    let results:Vec<Row> = match _conn.query(qtosend) {
         Ok(results) => results,
         Err(e) => {
             eprintln!("Error querying database: {}", e);
@@ -312,6 +326,7 @@ pub fn printeuser(uid:String,_pswd:String)-> Result<Eachuser,()>{
             return Err(());
         }
     }))
+    // Ok(Eachuser { id: "".to_string(), url: "".to_string() })
 }
 
 pub fn getfromquickfetch(id:String)-> Result<Eachredisentry,()>{
@@ -438,7 +453,7 @@ pub fn checklogin(uid:String,_password:String)-> Result<String,()>{
             return Err(());
         }
     };
-    let results:Vec<Row> = match _conn.exec("SELECT * FROM urls WHERE id = UNHEX(MD5(?));",(format!("{}{}",uid,salt),)) {
+    let results:Vec<Row> = match _conn.exec("SELECT * FROM urls WHERE uid = UNHEX(MD5(?));",(format!("{}{}",uid,salt),)) {
         Ok(results) => results,
         Err(e) => {
             eprintln!("Error executing query: {}", e);
@@ -470,7 +485,7 @@ pub fn deleteuser(uid:String,_password:String)-> Result<String,()>{
             return Err(());
         }
     };
-    let results:Vec<Row> = match _conn.exec("DELETE FROM urls WHERE id=UNHEX(MD5(?));",(format!("{}{}",uid,salt),)) {
+    let results:Vec<Row> = match _conn.exec("DELETE FROM urls WHERE uid=UNHEX(MD5(?));",(format!("{}{}",uid,salt),)) {
         Ok(results) => results,
         Err(e) => {
             eprintln!("Error executing query: {}", e);
