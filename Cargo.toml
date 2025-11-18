@@ -76,6 +76,14 @@ path = "api/user/[id].rs"
 name = "_value_"
 path = "api/getvalue/[id].rs"
 
+[[bin]]
+name = "save"
+path = "api/save.rs"
+
+[[bin]]
+name = "retrieve"
+path = "api/retrieve.rs"
+
 # # not found
 # [[bin]]
 # name = "not_found"
