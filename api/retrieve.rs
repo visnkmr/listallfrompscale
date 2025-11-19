@@ -5,14 +5,6 @@ use url::Url;
 use listallfrompscale::getfromquickfetch;
 use vercel_runtime::{http::bad_request, run, Body, Error, Request, Response, StatusCode};
 
-// Helper to add CORS headers to any response
-fn with_cors<T>(resp: Response<T>) -> Response<T> {
-    resp.header("Access-Control-Allow-Origin", "*")
-        .header("Access-Control-Allow-Methods", "GET, OPTIONS")
-        .header("Access-Control-Allow-Headers", "*")
-        .header("Access-Control-Max-Age", "86400")
-}
-
 #[derive(Serialize)]
 pub struct APIError {
     pub message: &'static str,
@@ -38,11 +30,14 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
 
     // Only allow GET for this endpoint
     if req.method() != "GET" {
-        let mut resp = Response::builder()
+        return Ok(Response::builder()
             .status(StatusCode::METHOD_NOT_ALLOWED)
             .header("Content-Type", "application/json")
-            .body(json!({ "error": "Method not allowed" }).to_string().into())?;
-        return Ok(with_cors(resp));
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Methods", "GET, OPTIONS")
+            .header("Access-Control-Allow-Headers", "*")
+            .header("Access-Control-Max-Age", "86400")
+            .body(json!({ "error": "Method not allowed" }).to_string().into())?);
     }
 
     // ────────────────────── Normal logic ──────────────────────
@@ -50,11 +45,18 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
     let hash_query: HashMap<String, String> = parsed_url.query_pairs().into_owned().collect();
     let id = hash_query.get("id");
 
-    let response = match id {
-        None => bad_request(APIError {
-            message: "Query string is invalid. 'id' parameter is required.",
-            code: "query_string_invalid",
-        }),
+    match id {
+        None => {
+            let mut resp = bad_request(APIError {
+                message: "Query string is invalid. 'id' parameter is required.",
+                code: "query_string_invalid",
+            })?;
+            resp.headers_mut().insert("Access-Control-Allow-Origin", "*".parse().unwrap());
+            resp.headers_mut().insert("Access-Control-Allow-Methods", "GET, OPTIONS".parse().unwrap());
+            resp.headers_mut().insert("Access-Control-Allow-Headers", "*".parse().unwrap());
+            resp.headers_mut().insert("Access-Control-Max-Age", "86400".parse().unwrap());
+            Ok(resp)
+        },
         Some(id) => match getfromquickfetch(id.to_string()) {
             Ok(entry) => {
                 let value_json: Value = match serde_json::from_str(&entry.value) {
@@ -62,9 +64,13 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                     Err(_) => Value::String(entry.value),
                 };
 
-                Response::builder()
+                Ok(Response::builder()
                     .status(StatusCode::OK)
                     .header("Content-Type", "application/json")
+                    .header("Access-Control-Allow-Origin", "*")
+                    .header("Access-Control-Allow-Methods", "GET, OPTIONS")
+                    .header("Access-Control-Allow-Headers", "*")
+                    .header("Access-Control-Max-Age", "86400")
                     .body(
                         json!({
                             "success": true,
@@ -73,11 +79,15 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                         })
                         .to_string()
                         .into(),
-                    )?
+                    )?)
             }
-            Err(_) => Response::builder()
+            Err(_) => Ok(Response::builder()
                 .status(StatusCode::NOT_FOUND)
                 .header("Content-Type", "application/json")
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "GET, OPTIONS")
+                .header("Access-Control-Allow-Headers", "*")
+                .header("Access-Control-Max-Age", "86400")
                 .body(
                     json!({
                         "success": false,
@@ -85,10 +95,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
                     })
                     .to_string()
                     .into(),
-                )?,
+                )?),
         },
-    };
-
-    // Add CORS headers to every real response
-    Ok(with_cors(response))
+    }
 }
