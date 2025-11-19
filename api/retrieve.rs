@@ -5,6 +5,14 @@ use url::Url;
 use listallfrompscale::getfromquickfetch;
 use vercel_runtime::{http::bad_request, run, Body, Error, Request, Response, StatusCode};
 
+// Helper to add CORS headers to any response
+fn with_cors<T>(resp: Response<T>) -> Response<T> {
+    resp.header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        .header("Access-Control-Allow-Headers", "*")
+        .header("Access-Control-Max-Age", "86400")
+}
+
 #[derive(Serialize)]
 pub struct APIError {
     pub message: &'static str,
@@ -17,55 +25,70 @@ async fn main() -> Result<(), Error> {
 }
 
 pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
+    // ────────────────────── CORS Preflight ──────────────────────
+    if req.method() == "OPTIONS" {
+        return Ok(Response::builder()
+            .status(StatusCode::OK)
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Methods", "GET, OPTIONS")
+            .header("Access-Control-Allow-Headers", "*")
+            .header("Access-Control-Max-Age", "86400")
+            .body(Body::Empty)?);
+    }
+
+    // Only allow GET for this endpoint
+    if req.method() != "GET" {
+        let mut resp = Response::builder()
+            .status(StatusCode::METHOD_NOT_ALLOWED)
+            .header("Content-Type", "application/json")
+            .body(json!({ "error": "Method not allowed" }).to_string().into())?;
+        return Ok(with_cors(resp));
+    }
+
+    // ────────────────────── Normal logic ──────────────────────
     let parsed_url = Url::parse(&req.uri().to_string()).unwrap();
     let hash_query: HashMap<String, String> = parsed_url.query_pairs().into_owned().collect();
     let id = hash_query.get("id");
 
-    match id {
-        None => {
-            return bad_request(APIError {
-                message: "Query string is invalid. 'id' parameter is required.",
-                code: "query_string_invalid",
-            });
-        }
-        Some(id) => {
-            match getfromquickfetch(id.to_string()) {
-                Ok(entry) => {
-                    // The value in Redis is stored as a string, which might be a JSON string.
-                    // We try to parse it as JSON to return a proper JSON object, 
-                    // otherwise we return it as a string.
-                    let value_json: Value = match serde_json::from_str(&entry.value) {
-                        Ok(v) => v,
-                        Err(_) => Value::String(entry.value),
-                    };
+    let response = match id {
+        None => bad_request(APIError {
+            message: "Query string is invalid. 'id' parameter is required.",
+            code: "query_string_invalid",
+        }),
+        Some(id) => match getfromquickfetch(id.to_string()) {
+            Ok(entry) => {
+                let value_json: Value = match serde_json::from_str(&entry.value) {
+                    Ok(v) => v,
+                    Err(_) => Value::String(entry.value),
+                };
 
-                    Ok(Response::builder()
-                        .status(StatusCode::OK)
-                        .header("Content-Type", "application/json")
-                        .body(
-                            json!({
-                                "success": true,
-                                "id": id,
-                                "data": value_json
-                            })
-                            .to_string()
-                            .into(),
-                        )?)
-                },
-                Err(_) => {
-                    Ok(Response::builder()
-                        .status(StatusCode::NOT_FOUND)
-                        .header("Content-Type", "application/json")
-                        .body(
-                            json!({
-                                "success": false,
-                                "message": "Data not found"
-                            })
-                            .to_string()
-                            .into(),
-                        )?)
-                }
+                Response::builder()
+                    .status(StatusCode::OK)
+                    .header("Content-Type", "application/json")
+                    .body(
+                        json!({
+                            "success": true,
+                            "id": id,
+                            "data": value_json
+                        })
+                        .to_string()
+                        .into(),
+                    )?
             }
-        }
-    }
+            Err(_) => Response::builder()
+                .status(StatusCode::NOT_FOUND)
+                .header("Content-Type", "application/json")
+                .body(
+                    json!({
+                        "success": false,
+                        "message": "Data not found"
+                    })
+                    .to_string()
+                    .into(),
+                )?,
+        },
+    };
+
+    // Add CORS headers to every real response
+    Ok(with_cors(response))
 }
