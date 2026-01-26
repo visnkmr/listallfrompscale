@@ -10,7 +10,7 @@ upstash-ratelimit="0.1.0"
 redis = { version = "0.27.0" }
 reqwest = { version = "0.12.7", features = ["blocking","json"] }
 serde_json="1.0.96"
-chrono="0.4.26"
+chrono = { version = "0.4.26", features = ["serde"] }
 rayon="1.7.0"
 dotenv = "0.15.0"
 prefstore= {git="https://github.com/visnkmr/prefstore.git"}
@@ -21,6 +21,9 @@ mysql = { version = "*", default-features = false, features = ["minimal"] }
 # Previous line disables default mysql features,
 # so now we need to choose desired mysql_common features:
 mysql_common = { version = "*", default-features = false}
+jsonwebtoken = "9.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+urlencoding = "2.1"
 # diesel = { version = "2.2.4",features=["mysql"]}
 # diesel-async = { version = "0.3.1", features = ["mysql"] }
 # sqlx={version="0.8.2",features=["mysql","runtime-tokio-rustls"]}

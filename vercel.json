@@ -32,6 +32,14 @@
     {
       "source": "/user/(.*)",
       "destination": "/api/user/[id].rs"
+    },
+    {
+      "source": "/api/user/(.*)",
+      "destination": "/api/user/[id].rs"
+    },
+    {
+      "source": "/api/update",
+      "destination": "/api/update.rs"
     }
   ],
   "functions": {
@@ -53,7 +61,7 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "POST, GET"
+          "value": "POST, GET, PUT, DELETE, PATCH, OPTIONS"
         },
         {
           "key": "Author",
@@ -78,7 +86,7 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "POST, GET"
+          "value": "POST, GET, PUT, DELETE, PATCH, OPTIONS"
         },
         {
           "key": "Author",
